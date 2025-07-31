@@ -1,7 +1,9 @@
 package com.taskhub.entity;
 
+
 import jakarta.persistence.*;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -10,14 +12,15 @@ import java.util.List;
 @Entity
 @Data
 @NoArgsConstructor
+@AllArgsConstructor
 @Table(name = "users")
 public class User {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
 
     @Column(name = "name")
-    private String name;
+    private String userName;
 
     @Column(name = "email")
     private String email;
@@ -25,7 +28,8 @@ public class User {
     @Column(name = "password")
     private String password;
 
-    @OneToMany(mappedBy = "owner" ,cascade = CascadeType.ALL,orphanRemoval = true,fetch = FetchType.LAZY)
-    @Column(name = "projects")
+    @OneToMany(mappedBy = "owner" ,cascade = CascadeType.ALL,orphanRemoval = true,
+            fetch = FetchType.EAGER)
+
     private List<Project> projects;
 }

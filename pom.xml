@@ -4,16 +4,15 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>org.example</groupId>
-    <artifactId>demo</artifactId>
+    <groupId>com.taskhub</groupId>
+    <artifactId>hibernateServlet</artifactId>
     <version>1.0-SNAPSHOT</version>
-    <name>demo</name>
     <packaging>war</packaging>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <maven.compiler.target>24</maven.compiler.target>
-        <maven.compiler.source>24</maven.compiler.source>
+        <maven.compiler.target>21</maven.compiler.target>
+        <maven.compiler.source>21</maven.compiler.source>
         <junit.version>5.11.0</junit.version>
     </properties>
 
@@ -28,9 +27,6 @@
             <scope>provided</scope>
         </dependency>
 
-
-
-
         <!--Тестирование -->
         <dependency>
             <groupId>org.junit.jupiter</groupId>
@@ -44,8 +40,6 @@
             <version>5.11.0</version>
             <scope>test</scope>
         </dependency>
-
-
 
 
         <!-- Логирование (Адаптер SLF4J → Log4j2) -->
@@ -69,20 +63,16 @@
             <artifactId>slf4j-api</artifactId>
             <version>2.0.13</version>
         </dependency>
-        <dependency>
-            <groupId>p6spy</groupId>
-            <artifactId>p6spy</artifactId>
-            <version>3.9.1</version>
-        </dependency>
+
 
 
 
 
         <!-- Работа с БД -->
         <dependency>
-            <groupId>org.hibernate</groupId>
-            <artifactId>hibernate-core-jakarta</artifactId>
-            <version>5.6.14.Final</version>
+            <groupId>org.hibernate.orm</groupId>
+            <artifactId>hibernate-core</artifactId>
+            <version>7.0.7.Final</version>
         </dependency>
         <dependency>
             <groupId>org.postgresql</groupId>
@@ -90,9 +80,22 @@
             <version>42.7.3</version>
         </dependency>
         <dependency>
-            <groupId>jakarta.persistence</groupId>
-            <artifactId>jakarta.persistence-api</artifactId>
-            <version>3.1.0</version>
+            <groupId>jakarta.platform</groupId>
+            <artifactId>jakarta.jakartaee-api</artifactId>
+            <version>10.0.0</version>
+            <scope>provided</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>com.zaxxer</groupId>
+            <artifactId>HikariCP</artifactId>
+            <version>6.3.2</version>
+        </dependency>
+        <!--Логи для hibernate-->
+        <dependency>
+            <groupId>p6spy</groupId>
+            <artifactId>p6spy</artifactId>
+            <version>3.9.1</version>
         </dependency>
 
 
@@ -101,11 +104,13 @@
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
-            <version>1.18.30</version>
+            <version>1.18.36</version>
+            <scope>provided</scope>
         </dependency>
     </dependencies>
 
     <build>
+        <finalName>root</finalName>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>

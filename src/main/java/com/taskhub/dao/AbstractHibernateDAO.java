@@ -1,57 +1,143 @@
-
 package com.taskhub.dao;
+
+
+import org.hibernate.HibernateException;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
-import org.hibernate.query.Query;
+
+
 
 import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
 
-public abstract class AbstractHibernateDAO<T>{
+public abstract class AbstractHibernateDAO<T> {
 
     private final Class<T> clazz;
-    private SessionFactory sessionFactory;
+    private final SessionFactory sessionFactory;
 
-    public AbstractHibernateDAO(final Class<T> clazz,SessionFactory sessionFactory) {
+    public AbstractHibernateDAO(final Class<T> clazz, SessionFactory sessionFactory) {
         this.clazz = clazz;
         this.sessionFactory = sessionFactory;
-
     }
 
-    public T getById(final int id){
-        return (T) getCurrentSession().get(clazz, id);
+
+    public Optional<T> getById(final Long id) {
+        if  (Objects.isNull(id)) {
+            throw new IllegalArgumentException("id is null");
+        }
+        return Optional.ofNullable(getCurrentSession().find(clazz, id));
     }
 
-    public List<T> getItems(int offset, int count){
-        Query query = getCurrentSession().createQuery("from "+ clazz.getName(),clazz);
-        query.setFirstResult(offset);
-        query.setMaxResults(count);
-        return query.getResultList();
 
+    public List<T> getItems(int offset, int count) {
+        return getCurrentSession()
+                .createQuery("from " + clazz.getName(), clazz)
+                .setFirstResult(offset)
+                .setMaxResults(count)
+                .getResultList();
     }
-    public List<T> findAll(){
-        return getCurrentSession().createQuery("from "+ clazz.getName(),clazz).list();
+
+
+    public List<T> findAll() {
+        return getCurrentSession()
+                .createQuery("from " + clazz.getName(), clazz)
+                .list();
     }
+
+
     public T save(final T entity) {
-        getCurrentSession().saveOrUpdate(entity);
+        try{
+            getCurrentSession().getTransaction().begin();
+            if(Objects.nonNull(entity)) {
+                getCurrentSession().persist(entity);
+            }
+            else{
+                throw new RuntimeException("Nothing to save");
+            }
+        }
+        catch(HibernateException hex){
+            getCurrentSession().getTransaction().rollback();
+            throw new HibernateException("Save failed");
+        }
+        finally{
+            getCurrentSession().getTransaction().commit();
+            getCurrentSession().close();
+        }
         return entity;
     }
 
+
     public T update(final T entity) {
-        return (T) getCurrentSession().merge(entity);
+        try{
+            getCurrentSession().getTransaction().begin();
+            if(Objects.nonNull(entity)) {
+                getCurrentSession().merge(entity);
+            }
+            else{
+                throw new RuntimeException("Nothing to update");
+            }
+        }
+        catch(HibernateException hex){
+            getCurrentSession().getTransaction().rollback();
+            throw new HibernateException("Update failed");
+        }
+        finally{
+            getCurrentSession().getTransaction().commit();
+            getCurrentSession().close();
+        }
+        return entity;
     }
+
 
     public void delete(final T entity) {
-        getCurrentSession().delete(entity);
-    }
-    public void deleteById(final int entityId) {
-        final T entity = getById(entityId);
-        delete(entity);
+        try{
+            getCurrentSession().getTransaction().begin();
+            if(Objects.nonNull(entity)) {
+                getCurrentSession().remove(entity);
+            }
+            else{
+                throw new RuntimeException("Nothing to update");
+            }
+        }
+        catch(HibernateException hex){
+            getCurrentSession().getTransaction().rollback();
+            throw new HibernateException("Delete failed");
+        }
+        finally{
+            getCurrentSession().getTransaction().commit();
+            getCurrentSession().close();
+        }
     }
 
 
-    protected Session getCurrentSession() {
+    public void deleteById(final Long entityId) {
+        try{
+            getCurrentSession().getTransaction().begin();
+            if(Objects.nonNull(entityId)) {
+                final T entity = getById(entityId).orElseThrow();
+                delete(entity);
+            }
+            else{
+                throw new RuntimeException("Nothing to delete");
+            }
+
+        }
+        catch(HibernateException hex){
+            getCurrentSession().getTransaction().rollback();
+            throw new HibernateException("Deletion by id was failed");
+        }
+        finally{
+            getCurrentSession().getTransaction().commit();
+            getCurrentSession().close();
+        }
+    }
+
+    public int getAllCount(){
+        return Math.toIntExact(getCurrentSession().createQuery("select count(*) from " + clazz.getName(),Long.class).uniqueResult());
+    }
+
+    public Session getCurrentSession() {
         return sessionFactory.getCurrentSession();
     }
-
-
 }
