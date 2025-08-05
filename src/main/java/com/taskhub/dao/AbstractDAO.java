@@ -11,12 +11,12 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
-public abstract class AbstractHibernateDAO<T> {
+public abstract class AbstractDAO<T> {
 
     private final Class<T> clazz;
     private final SessionFactory sessionFactory;
 
-    public AbstractHibernateDAO(final Class<T> clazz, SessionFactory sessionFactory) {
+    public AbstractDAO(final Class<T> clazz, SessionFactory sessionFactory) {
         this.clazz = clazz;
         this.sessionFactory = sessionFactory;
     }
