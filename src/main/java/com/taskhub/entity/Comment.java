@@ -24,10 +24,14 @@ public class Comment {
     private LocalDateTime creationDate;
 
     @ManyToOne
-    @JoinColumn(name = "user_id")
+    @JoinColumn(name = "user_id", foreignKey = @ForeignKey(name = "fk_comments_user"))
     private User author;
 
     @ManyToOne
-    @JoinColumn(name = "task_id")
+    @JoinColumn(name = "task_id", foreignKey = @ForeignKey(name = "fk_comments_task"))
     private Task task;
+
+    @ManyToOne
+    @JoinColumn(name = "user_id", foreignKey = @ForeignKey(name = "fk_comments_user"))
+    private User user;
 }

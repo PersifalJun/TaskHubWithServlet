@@ -1,5 +1,6 @@
 package com.taskhub.service;
 
+import com.taskhub.dao.DAO;
 import com.taskhub.dao.TaskDAO;
 
 import com.taskhub.dto.TaskInfo;
@@ -9,7 +10,7 @@ import com.taskhub.entity.Task;
 
 public class TaskService extends AbstractService<Task> {
 
-    public TaskService(TaskDAO taskDAO) {
+    public TaskService(DAO<Task> taskDAO) {
       super(taskDAO);
     }
 

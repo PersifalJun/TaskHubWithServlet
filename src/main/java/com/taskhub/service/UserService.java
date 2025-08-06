@@ -1,13 +1,13 @@
 package com.taskhub.service;
 
-import com.taskhub.dao.UserDAO;
+import com.taskhub.dao.DAO;
 import com.taskhub.dto.UserInfo;
 import com.taskhub.entity.User;
 
 
 
 public class UserService extends AbstractService<User> {
-    public UserService(UserDAO userDAO) {
+    public UserService(DAO<User> userDAO) {
         super(userDAO);
     }
 
@@ -17,7 +17,7 @@ public class UserService extends AbstractService<User> {
         user.setUserName(info.getUserName());
         user.setEmail(info.getEmail());
         user.setPassword(info.getPassword());
-        return  dao.update(user);
+        return dao.update(user);
     }
 
     public User create(UserInfo info) {

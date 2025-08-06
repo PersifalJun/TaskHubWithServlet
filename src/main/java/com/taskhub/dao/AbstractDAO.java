@@ -11,7 +11,9 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
-public abstract class AbstractDAO<T> {
+import static java.util.Objects.isNull;
+
+public abstract class AbstractDAO<T> implements DAO<T> {
 
     private final Class<T> clazz;
     private final SessionFactory sessionFactory;
@@ -23,113 +25,112 @@ public abstract class AbstractDAO<T> {
 
 
     public Optional<T> getById(final Long id) {
-        if  (Objects.isNull(id)) {
-            throw new IllegalArgumentException("id is null");
+        Optional<T> result = null;
+        try {
+            Session session = getCurrentSession();
+            session.beginTransaction();
+            result = Optional.ofNullable(getCurrentSession().find(clazz, id));
+        } catch (Exception ex) {
+            if (isNull(id)) {
+                getCurrentSession().getTransaction().rollback();
+                throw new IllegalArgumentException("id is null");
+            }
         }
-        return Optional.ofNullable(getCurrentSession().find(clazz, id));
+        return result;
     }
 
 
+
     public List<T> getItems(int offset, int count) {
-        return getCurrentSession()
-                .createQuery("from " + clazz.getName(), clazz)
-                .setFirstResult(offset)
-                .setMaxResults(count)
-                .getResultList();
+        List<T> result;
+        try{
+            Session session = getCurrentSession();
+            session.beginTransaction();
+            result = session.createQuery("from " + clazz.getName(), clazz).setFirstResult(offset)
+                    .setMaxResults(count)
+                    .getResultList();
+            session.getTransaction().commit();
+        }catch (Exception e) {
+            getCurrentSession().getTransaction().rollback();
+            throw new HibernateException("findAll failed", e);
+        }
+        return result;
     }
 
 
     public List<T> findAll() {
-        return getCurrentSession()
-                .createQuery("from " + clazz.getName(), clazz)
-                .list();
+
+        List<T> result;
+        try {
+            Session session = getCurrentSession();
+            session.beginTransaction();
+            result = session.createQuery("from " + clazz.getName(), clazz).list();
+            session.getTransaction().commit();
+        } catch (Exception e) {
+            getCurrentSession().getTransaction().rollback();
+            throw new HibernateException("findAll failed", e);
+        }
+        return result;
     }
 
 
     public T save(final T entity) {
-        try{
-            getCurrentSession().getTransaction().begin();
-            if(Objects.nonNull(entity)) {
-                getCurrentSession().persist(entity);
-            }
-            else{
-                throw new RuntimeException("Nothing to save");
-            }
-        }
-        catch(HibernateException hex){
+        try {
+            Session session = getCurrentSession();
+            session.beginTransaction();
+            if (isNull(entity)) throw new RuntimeException("Nothing to save");
+            session.persist(entity);
+            session.getTransaction().commit();
+            return entity;
+        } catch (Exception e) {
             getCurrentSession().getTransaction().rollback();
-            throw new HibernateException("Save failed");
+            throw new HibernateException("Save failed", e);
         }
-        finally{
-            getCurrentSession().getTransaction().commit();
-            getCurrentSession().close();
-        }
-        return entity;
     }
-
 
     public T update(final T entity) {
-        try{
-            getCurrentSession().getTransaction().begin();
-            if(Objects.nonNull(entity)) {
-                getCurrentSession().merge(entity);
-            }
-            else{
-                throw new RuntimeException("Nothing to update");
-            }
-        }
-        catch(HibernateException hex){
+        try {
+            Session session = getCurrentSession();
+            session.beginTransaction();
+            if (Objects.isNull(entity)) throw new RuntimeException("Nothing to update");
+            T merged = session.merge(entity);
+            session.getTransaction().commit();
+            return merged;
+        } catch (Exception e) {
             getCurrentSession().getTransaction().rollback();
-            throw new HibernateException("Update failed");
+            throw new HibernateException("Update failed", e);
         }
-        finally{
-            getCurrentSession().getTransaction().commit();
-            getCurrentSession().close();
-        }
-        return entity;
     }
+
 
 
     public void delete(final T entity) {
-        try{
-            getCurrentSession().getTransaction().begin();
-            if(Objects.nonNull(entity)) {
-                getCurrentSession().remove(entity);
-            }
-            else{
-                throw new RuntimeException("Nothing to update");
-            }
-        }
-        catch(HibernateException hex){
+        try {
+            Session session = getCurrentSession();
+            session.beginTransaction();
+            if (Objects.isNull(entity)) throw new RuntimeException("Nothing to delete");
+            session.remove(entity);
+            session.getTransaction().commit();
+        } catch (Exception e) {
             getCurrentSession().getTransaction().rollback();
-            throw new HibernateException("Delete failed");
-        }
-        finally{
-            getCurrentSession().getTransaction().commit();
-            getCurrentSession().close();
+            throw new HibernateException("Delete failed", e);
         }
     }
 
 
     public void deleteById(final Long entityId) {
-        try{
-            getCurrentSession().getTransaction().begin();
-            if(Objects.nonNull(entityId)) {
-                final T entity = getById(entityId).orElseThrow();
-                delete(entity);
+        try {
+            Session session = getCurrentSession();
+            session.beginTransaction();
+            if (Objects.isNull(entityId)) throw new RuntimeException("Nothing to delete");
+            final T entity = session.find(clazz, entityId);
+            if (Objects.nonNull(entity)) {
+                session.remove(entity);
             }
-            else{
-                throw new RuntimeException("Nothing to delete");
-            }
-
-        }
-        catch(HibernateException hex){
+            session.getTransaction().commit();
+        } catch (Exception e) {
             getCurrentSession().getTransaction().rollback();
-            throw new HibernateException("Deletion by id was failed");
-        }
-        finally{
-            getCurrentSession().getTransaction().commit();
-            getCurrentSession().close();
+            throw new HibernateException("Deletion by id was failed", e);
         }
     }
 
