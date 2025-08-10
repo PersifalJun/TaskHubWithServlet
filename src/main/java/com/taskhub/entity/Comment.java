@@ -31,7 +31,4 @@ public class Comment {
     @JoinColumn(name = "task_id", foreignKey = @ForeignKey(name = "fk_comments_task"))
     private Task task;
 
-    @ManyToOne
-    @JoinColumn(name = "user_id", foreignKey = @ForeignKey(name = "fk_comments_user"))
-    private User user;
 }

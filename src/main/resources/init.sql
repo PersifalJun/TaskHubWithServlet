@@ -199,3 +199,5 @@ INSERT INTO comments (id, content, date_of_creation, user_id, task_id) VALUES (5
 INSERT INTO comments (id, content, date_of_creation, user_id, task_id) VALUES (54, 'Please clarify this section.', '2025-07-30 03:00:00', 1, 40);
 INSERT INTO comments (id, content, date_of_creation, user_id, task_id) VALUES (55, 'Check the logic.', '2025-07-27 14:00:00', 5, 29);
 INSERT INTO comments (id, content, date_of_creation, user_id, task_id) VALUES (56, 'This could be optimized.', '2025-08-01 19:00:00', 9, 40);
+
+-- SELECT setval('users_id_seq', (SELECT MAX(id) FROM users));

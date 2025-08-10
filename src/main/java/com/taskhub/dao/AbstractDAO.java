@@ -41,6 +41,10 @@ public abstract class AbstractDAO<T> implements DAO<T> {
 
 
 
+
+
+
+
     public List<T> getItems(int offset, int count) {
         List<T> result;
         try{
@@ -64,7 +68,7 @@ public abstract class AbstractDAO<T> implements DAO<T> {
         try {
             Session session = getCurrentSession();
             session.beginTransaction();
-            result = session.createQuery("from " + clazz.getName(), clazz).list();
+            result = session.createQuery("from " + clazz.getName() + " e ORDER BY e.id ASC", clazz).list();
             session.getTransaction().commit();
         } catch (Exception e) {
             getCurrentSession().getTransaction().rollback();

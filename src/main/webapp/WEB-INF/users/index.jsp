@@ -7,7 +7,7 @@
 <body>
 <h2>All Users</h2>
 
-<a href="${pageContext.request.contextPath}/users/new">Create New User</a>
+
 <br><br>
 
 <table border="1" cellpadding="5">
@@ -26,6 +26,8 @@
             <td>
                 <a href="${pageContext.request.contextPath}/users/${user.id}">View</a> |
                 <a href="${pageContext.request.contextPath}/users/${user.id}/edit">Edit</a> |
+                <a href ="${pageContext.request.contextPath}/users/${user.id}/projects">Projects</a> |
+                <a href ="${pageContext.request.contextPath}/users/${user.id}/taskList">TaskList</a> |
                 <form action="${pageContext.request.contextPath}/users/${user.id}/delete" method="post" style="display:inline;">
                     <button type="submit" onclick="return confirm('Are you sure?')">Delete</button>
                 </form>
@@ -33,6 +35,8 @@
         </tr>
     </c:forEach>
 </table>
+<br/>
+<a href="${pageContext.request.contextPath}/users/new">Create New User</a>
 
 </body>
 </html>

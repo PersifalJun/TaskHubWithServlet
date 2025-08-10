@@ -1,7 +1,7 @@
 package com.taskhub.service;
 
 
-
+import com.taskhub.dao.DAO;
 
 import java.util.List;
 
@@ -21,4 +21,5 @@ public interface Service<T> {
 
      int getAllCount();
 
+    List<T> getByUserId(Long userId, DAO<T> projectDao);
 }

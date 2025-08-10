@@ -7,6 +7,8 @@ import com.taskhub.dto.TaskInfo;
 
 import com.taskhub.entity.Task;
 
+import java.util.List;
+
 
 public class TaskService extends AbstractService<Task> {
 
@@ -14,6 +16,10 @@ public class TaskService extends AbstractService<Task> {
       super(taskDAO);
     }
 
+    @Override
+    public List<Task> getByUserId(Long userId, DAO<Task> projectDao) {
+        return List.of();
+    }
 
 
     public Task edit(Long taskId,TaskInfo info) {

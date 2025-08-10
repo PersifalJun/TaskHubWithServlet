@@ -6,7 +6,7 @@ import com.taskhub.dao.DAO;
 
 import java.util.List;
 
-public class AbstractService<T> implements Service<T> {
+public abstract class AbstractService<T> implements Service<T> {
     protected final DAO<T> dao;
 
     public AbstractService(DAO<T> dao) {
@@ -47,6 +47,10 @@ public class AbstractService<T> implements Service<T> {
     public int getAllCount() {
         return dao.getAllCount();
     }
+
+    @Override
+    public abstract List<T> getByUserId(Long userId, DAO<T> projectDao);
+
 
 
 }

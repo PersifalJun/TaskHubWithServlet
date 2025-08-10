@@ -3,9 +3,12 @@ package com.taskhub.controller;
 import com.taskhub.config.PropertiesSessionFactoryProvider;
 import com.taskhub.config.SessionFactoryProvider;
 import com.taskhub.dao.DAO;
+import com.taskhub.dao.ProjectDAO;
 import com.taskhub.dao.UserDAO;
 import com.taskhub.dto.UserInfo;
+import com.taskhub.entity.Project;
 import com.taskhub.entity.User;
+import com.taskhub.service.ProjectService;
 import com.taskhub.service.Service;
 import com.taskhub.service.UserService;
 import jakarta.servlet.ServletException;
@@ -13,6 +16,7 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.SneakyThrows;
 
 
 import java.io.IOException;
@@ -25,37 +29,59 @@ import static java.util.Objects.isNull;
 @WebServlet(name = "UserServlet", value = "/users")
 public class UserServlet extends HttpServlet {
 
+
+
     private final SessionFactoryProvider sessionFactoryProvider;
-    private final DAO<User> dao;
-    private final Service<User> service;
+    private final DAO<User> userDAO;
+    private final DAO<Project> projectDao;
+    private final Service<User> userService;
+    private final Service<Project> projectService;
 
     public UserServlet() {
         sessionFactoryProvider = new PropertiesSessionFactoryProvider();
-        dao = new UserDAO(sessionFactoryProvider.getSessionFactory());
-        service = new UserService(dao);
+        userDAO = new UserDAO(sessionFactoryProvider.getSessionFactory());
+        projectDao = new ProjectDAO(sessionFactoryProvider.getSessionFactory());
+        userService = new UserService(userDAO);
+        projectService = new ProjectService(projectDao);
     }
 
+    @SneakyThrows
     @Override
-    protected void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
+    protected void doGet(HttpServletRequest request, HttpServletResponse response)  {
         String path = request.getPathInfo(); // например, /1, /new, /edit
 
+        //Users
         if (isNull(path) || path.equals("/")) {
             index(request, response);
         } else if (path.matches("/\\d+")) {
-            show(request, response);
+            showUserProfile(request, response);
         } else if (path.matches("/\\d+/edit")) {
-            edit(request, response);
-
-        }else if (path.equals("/new")) {
+            editUserProfile(request, response);
+        }
+        else if (path.equals("/new")) {
             request.getRequestDispatcher("/WEB-INF/users/new.jsp").forward(request, response);
+        }
+
+        //Projects
+
+        //Все проекты
+        else if (path.equals("/projects")) {   //http://localhost:8081/users/projects
+            projectsIndex(request, response);
+        }
+
+        //Проекты конкретного пользователя
+        else if (path.matches("/\\d+/projects")) {
+            showPersonalProjects(request, response);
         }
         else {
             response.sendError(HttpServletResponse.SC_NOT_FOUND);
         }
-    }
 
+
+    }
+    @SneakyThrows
     @Override
-    protected void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
+    protected void doPost(HttpServletRequest request, HttpServletResponse response) {
         String path =  request.getPathInfo();
 
         if (path.equals("/create")) {
@@ -77,14 +103,29 @@ public class UserServlet extends HttpServlet {
         return Long.parseLong(path.split("/")[1]);
     }
 
-    private void index(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        List<User> allUsers = service.getAll();
-        request.setAttribute("users", allUsers);
+    @SneakyThrows
+    private void index(HttpServletRequest request, HttpServletResponse response) {
+
+        request.setAttribute("users", userService.getAll());
         request.getRequestDispatcher("/WEB-INF/users/index.jsp").forward(request, response);
     }
+    @SneakyThrows
+    private void showUserProfile(HttpServletRequest request, HttpServletResponse response){
+
+        request.setAttribute("user", userService.getById(extractId(request)));
+        request.getRequestDispatcher("/WEB-INF/users/show.jsp").forward(request, response);
+    }
+    @SneakyThrows
+    private void editUserProfile(HttpServletRequest request, HttpServletResponse response) {
+
+        request.setAttribute("user", userService.getById(extractId(request)));
+        request.getRequestDispatcher("/WEB-INF/users/edit.jsp").forward(request, response);
 
 
-    private void create(HttpServletRequest request, HttpServletResponse response) throws IOException {
+    }
+
+    @SneakyThrows
+    private void create(HttpServletRequest request, HttpServletResponse response) {
         String userName = request.getParameter("userName");
         String password = request.getParameter("password");
         String email = request.getParameter("email");
@@ -97,43 +138,82 @@ public class UserServlet extends HttpServlet {
         }
 
         UserInfo info = new UserInfo(userName, password, email);
-        ((UserService) service).create(info); //
+        ((UserService) userService).create(info); //
 
         response.sendRedirect(request.getContextPath() + "/users");
     }
 
-    private void show(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        User user = service.getById(extractId(request));
-        request.setAttribute("user", user);
-        request.getRequestDispatcher("/WEB-INF/users/show.jsp").forward(request, response);
+    @SneakyThrows
+    private void delete(HttpServletRequest request, HttpServletResponse response) {
+        userService.deleteById(extractId(request));
+        response.sendRedirect(request.getContextPath() + "/users");
     }
 
-    private void edit(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        User user = service.getById(extractId(request));
-        request.setAttribute("user", user);
-        request.getRequestDispatcher("/WEB-INF/users/edit.jsp").forward(request, response);
 
-
-    }
-
-    private void update(HttpServletRequest request, HttpServletResponse response) throws IOException {
+    @SneakyThrows
+    private void update(HttpServletRequest request, HttpServletResponse response) {
 
         Long id = extractId(request);
+        UserInfo info = new UserInfo(request.getParameter("userName"),
+                request.getParameter("password"),request.getParameter("email"));
 
-        String userName = request.getParameter("userName");
-        String password = request.getParameter("password");
-        String email = request.getParameter("email");
-
-        UserInfo info = new UserInfo(userName, password, email);
-        ((UserService) service).edit(id, info);
+        ((UserService) userService).edit(id, info);
 
         response.sendRedirect(request.getContextPath() + "/users");
     }
 
-    private void delete(HttpServletRequest request, HttpServletResponse response) throws IOException {
-        service.deleteById(extractId(request));
-        response.sendRedirect(request.getContextPath() + "/users");
+
+
+    @SneakyThrows
+    private void projectsIndex(HttpServletRequest request, HttpServletResponse response) {
+
+        request.setAttribute("projects", projectService.getAll());
+        request.getRequestDispatcher("/WEB-INF/projects/index.jsp").forward(request,response);
+
     }
+    @SneakyThrows
+    private void showPersonalProjects(HttpServletRequest request, HttpServletResponse response) {
+
+        Long userId = extractId(request);
+
+        List<Project> projects = projectService.getByUserId(userId,projectDao);
+
+        request.setAttribute("projects", projects);
+        request.getRequestDispatcher("/WEB-INF/projects/show.jsp").forward(request, response);
+
+    }
+    @SneakyThrows
+    private void editProjects(HttpServletRequest request, HttpServletResponse response) {
+        request.setAttribute("project", projectService.getById(extractId(request)));
+        request.getRequestDispatcher("/WEB-INF/projects/edit.jsp").forward(request, response);
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+    //Комментарии
+
+    private void commentsIndex(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+
+        request.setAttribute("comments",userService.getAll());
+        request.getRequestDispatcher("/WEB-INF/comments/index.jsp").forward(request, response);
+
+
+    }
+
+    //Список заданий
+
+
+
 }
 
 

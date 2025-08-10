@@ -1,9 +1,9 @@
 package com.taskhub.dto;
 
-import com.taskhub.entity.Task;
+
 import lombok.Data;
 
-import java.io.Serializable;
+
 import java.time.LocalDateTime;
 
 @Data
