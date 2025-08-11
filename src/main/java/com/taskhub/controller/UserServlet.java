@@ -5,18 +5,21 @@ import com.taskhub.config.SessionFactoryProvider;
 import com.taskhub.dao.DAO;
 import com.taskhub.dao.ProjectDAO;
 import com.taskhub.dao.UserDAO;
+import com.taskhub.dto.ProjectInfo;
 import com.taskhub.dto.UserInfo;
 import com.taskhub.entity.Project;
 import com.taskhub.entity.User;
 import com.taskhub.service.ProjectService;
 import com.taskhub.service.Service;
 import com.taskhub.service.UserService;
+import com.taskhub.utils.Util;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.SneakyThrows;
+
 
 
 import java.io.IOException;
@@ -26,7 +29,7 @@ import java.util.List;
 
 import static java.util.Objects.isNull;
 
-@WebServlet(name = "UserServlet", value = "/users")
+@WebServlet(name = "UserServlet", value = "/users*")
 public class UserServlet extends HttpServlet {
 
 
@@ -61,17 +64,18 @@ public class UserServlet extends HttpServlet {
         else if (path.equals("/new")) {
             request.getRequestDispatcher("/WEB-INF/users/new.jsp").forward(request, response);
         }
-
+        //---------------------------------------//
         //Projects
-
         //Все проекты
         else if (path.equals("/projects")) {   //http://localhost:8081/users/projects
             projectsIndex(request, response);
         }
-
         //Проекты конкретного пользователя
         else if (path.matches("/\\d+/projects")) {
             showPersonalProjects(request, response);
+        }
+        else if (path.matches("/\\d+/projects/\\d+/edit")) {
+            editProjects(request, response);
         }
         else {
             response.sendError(HttpServletResponse.SC_NOT_FOUND);
@@ -84,25 +88,38 @@ public class UserServlet extends HttpServlet {
     protected void doPost(HttpServletRequest request, HttpServletResponse response) {
         String path =  request.getPathInfo();
 
+        //Users
         if (path.equals("/create")) {
             create( request, response);
         } else if (path.matches("/\\d+/update")) {
             update(request, response);
         } else if (path.matches("/\\d+/delete")) {
             delete( request, response);
-        } else {
+
+        }
+
+
+        //---------------------------------------//
+        //Projects
+        else if (path.matches("/\\d+/projects/\\d+/update")) {
+           updateProjects(request, response);
+        }
+        else if (path.matches("/\\d+/projects/\\d+/delete")) {
+            deleteProjects(request, response);
+        }
+        else {
             response.sendError(HttpServletResponse.SC_NOT_FOUND);
         }
     }
 
-    private Long extractId(HttpServletRequest request) {
-        String path = request.getPathInfo();   // /5 или /5/edit
-        if (isNull(path) || path.split("/").length < 2) {
-            throw new IllegalArgumentException("Invalid path: " + path);
-        }
-        return Long.parseLong(path.split("/")[1]);
-    }
 
+
+
+
+
+
+    //---------------------------------------//
+    //Users
     @SneakyThrows
     private void index(HttpServletRequest request, HttpServletResponse response) {
 
@@ -112,18 +129,16 @@ public class UserServlet extends HttpServlet {
     @SneakyThrows
     private void showUserProfile(HttpServletRequest request, HttpServletResponse response){
 
-        request.setAttribute("user", userService.getById(extractId(request)));
+        request.setAttribute("user", userService.getById(Util.extractUserId(request)));
         request.getRequestDispatcher("/WEB-INF/users/show.jsp").forward(request, response);
     }
     @SneakyThrows
     private void editUserProfile(HttpServletRequest request, HttpServletResponse response) {
 
-        request.setAttribute("user", userService.getById(extractId(request)));
+        request.setAttribute("user", userService.getById(Util.extractUserId(request)));
         request.getRequestDispatcher("/WEB-INF/users/edit.jsp").forward(request, response);
 
-
     }
-
     @SneakyThrows
     private void create(HttpServletRequest request, HttpServletResponse response) {
         String userName = request.getParameter("userName");
@@ -145,7 +160,7 @@ public class UserServlet extends HttpServlet {
 
     @SneakyThrows
     private void delete(HttpServletRequest request, HttpServletResponse response) {
-        userService.deleteById(extractId(request));
+        userService.deleteById(Util.extractUserId(request));
         response.sendRedirect(request.getContextPath() + "/users");
     }
 
@@ -153,7 +168,7 @@ public class UserServlet extends HttpServlet {
     @SneakyThrows
     private void update(HttpServletRequest request, HttpServletResponse response) {
 
-        Long id = extractId(request);
+        Long id = Util.extractUserId(request);
         UserInfo info = new UserInfo(request.getParameter("userName"),
                 request.getParameter("password"),request.getParameter("email"));
 
@@ -164,6 +179,8 @@ public class UserServlet extends HttpServlet {
 
 
 
+    //---------------------------------------//
+    //Projects
     @SneakyThrows
     private void projectsIndex(HttpServletRequest request, HttpServletResponse response) {
 
@@ -174,18 +191,61 @@ public class UserServlet extends HttpServlet {
     @SneakyThrows
     private void showPersonalProjects(HttpServletRequest request, HttpServletResponse response) {
 
-        Long userId = extractId(request);
+        Long userId = Util.extractUserId(request);
 
         List<Project> projects = projectService.getByUserId(userId,projectDao);
 
+
         request.setAttribute("projects", projects);
+        request.setAttribute("owner",  userService.getById(userId));
         request.getRequestDispatcher("/WEB-INF/projects/show.jsp").forward(request, response);
 
     }
     @SneakyThrows
     private void editProjects(HttpServletRequest request, HttpServletResponse response) {
-        request.setAttribute("project", projectService.getById(extractId(request)));
+        Long id = Util.extractUserId(request);
+        request.setAttribute("project", projectService.getById(Util.extractUserId(request)));
+        request.setAttribute("user", projectService.getById(id).getOwner());
         request.getRequestDispatcher("/WEB-INF/projects/edit.jsp").forward(request, response);
+    }
+
+    @SneakyThrows
+    private void updateProjects(HttpServletRequest request, HttpServletResponse response) {
+        Long id = Util.extractUserId(request);
+        ProjectInfo info = new ProjectInfo(request.getParameter("projectName"));
+
+        ((ProjectService) projectService).edit(id, info);
+
+        response.sendRedirect(request.getContextPath() + "/users/"+id+"/projects");
+    }
+
+    @SneakyThrows
+    private void createProject(HttpServletRequest request, HttpServletResponse response) {
+        String projectName = request.getParameter("projectName");
+        if(isNull(projectName) || projectName.isBlank()) {
+            response.sendError(HttpServletResponse.SC_BAD_REQUEST, "All fields are required");
+        }
+        ProjectInfo projectInfo =  new ProjectInfo(projectName);
+        ((ProjectService) projectService).create(projectInfo);
+
+        response.sendRedirect(request.getContextPath() + "/projects");
+    }
+
+    @SneakyThrows
+    private void deleteProjects(HttpServletRequest request, HttpServletResponse response) {
+        Long projectId = Util.extractProjectId(request);
+        Long ownerId = Util.extractUserId(request);
+
+        Project project = projectService.getById(projectId);
+        if (isNull(project)) {
+            response.sendError(HttpServletResponse.SC_NOT_FOUND, "Project not found");
+            return;
+        }
+
+
+        projectService.deleteById(projectId);
+
+        response.sendRedirect(request.getContextPath() + "/users/" + ownerId + "/projects");
     }
 
 

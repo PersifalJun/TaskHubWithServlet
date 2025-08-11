@@ -23,121 +23,122 @@ public abstract class AbstractDAO<T> implements DAO<T> {
         this.sessionFactory = sessionFactory;
     }
 
-
+    @Override
     public Optional<T> getById(final Long id) {
         Optional<T> result = null;
+        Session session = getCurrentSession();
         try {
-            Session session = getCurrentSession();
             session.beginTransaction();
-            result = Optional.ofNullable(getCurrentSession().find(clazz, id));
+            result = Optional.ofNullable(session.find(clazz, id));
+            session.getTransaction().commit();
         } catch (Exception ex) {
             if (isNull(id)) {
-                getCurrentSession().getTransaction().rollback();
-                throw new IllegalArgumentException("id is null");
+                session.getTransaction().rollback();
+                throw new HibernateException("Get by id failed for id: " + id, ex);
             }
         }
         return result;
     }
 
-
-
-
-
-
-
+    @Override
     public List<T> getItems(int offset, int count) {
         List<T> result;
+        Session session = getCurrentSession();
         try{
-            Session session = getCurrentSession();
             session.beginTransaction();
             result = session.createQuery("from " + clazz.getName(), clazz).setFirstResult(offset)
                     .setMaxResults(count)
                     .getResultList();
             session.getTransaction().commit();
         }catch (Exception e) {
-            getCurrentSession().getTransaction().rollback();
+            session.getTransaction().rollback();
             throw new HibernateException("findAll failed", e);
         }
         return result;
     }
 
-
+    @Override
     public List<T> findAll() {
 
         List<T> result;
+        Session session = getCurrentSession();
         try {
-            Session session = getCurrentSession();
             session.beginTransaction();
             result = session.createQuery("from " + clazz.getName() + " e ORDER BY e.id ASC", clazz).list();
             session.getTransaction().commit();
         } catch (Exception e) {
-            getCurrentSession().getTransaction().rollback();
+            session.getTransaction().rollback();
             throw new HibernateException("findAll failed", e);
         }
         return result;
     }
 
-
+    @Override
     public T save(final T entity) {
+        Session session = getCurrentSession();
         try {
-            Session session = getCurrentSession();
             session.beginTransaction();
             if (isNull(entity)) throw new RuntimeException("Nothing to save");
             session.persist(entity);
             session.getTransaction().commit();
             return entity;
         } catch (Exception e) {
-            getCurrentSession().getTransaction().rollback();
+            session.getTransaction().rollback();
             throw new HibernateException("Save failed", e);
         }
     }
-
+    @Override
     public T update(final T entity) {
+        Session session = getCurrentSession();
         try {
-            Session session = getCurrentSession();
             session.beginTransaction();
             if (Objects.isNull(entity)) throw new RuntimeException("Nothing to update");
             T merged = session.merge(entity);
             session.getTransaction().commit();
             return merged;
         } catch (Exception e) {
-            getCurrentSession().getTransaction().rollback();
+            session.getTransaction().rollback();
             throw new HibernateException("Update failed", e);
         }
     }
 
 
-
+    @Override
     public void delete(final T entity) {
+        Session session = getCurrentSession();
         try {
-            Session session = getCurrentSession();
             session.beginTransaction();
             if (Objects.isNull(entity)) throw new RuntimeException("Nothing to delete");
             session.remove(entity);
+            session.flush();
             session.getTransaction().commit();
         } catch (Exception e) {
-            getCurrentSession().getTransaction().rollback();
+            session.getTransaction().rollback();
             throw new HibernateException("Delete failed", e);
         }
     }
 
-
+    @Override
     public void deleteById(final Long entityId) {
+        Session session = getCurrentSession();
         try {
-            Session session = getCurrentSession();
             session.beginTransaction();
-            if (Objects.isNull(entityId)) throw new RuntimeException("Nothing to delete");
+            if (Objects.isNull(entityId)) {
+                throw new RuntimeException("Nothing to delete");
+            }
             final T entity = session.find(clazz, entityId);
             if (Objects.nonNull(entity)) {
                 session.remove(entity);
+                session.flush();
             }
             session.getTransaction().commit();
         } catch (Exception e) {
-            getCurrentSession().getTransaction().rollback();
+            session.getTransaction().rollback();
             throw new HibernateException("Deletion by id was failed", e);
         }
     }
 
+    @Override
     public int getAllCount(){
         return Math.toIntExact(getCurrentSession().createQuery("select count(*) from " + clazz.getName(),Long.class).uniqueResult());
     }

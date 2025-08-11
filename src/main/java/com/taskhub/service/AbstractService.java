@@ -4,6 +4,7 @@ package com.taskhub.service;
 import com.taskhub.dao.DAO;
 
 
+
 import java.util.List;
 
 public abstract class AbstractService<T> implements Service<T> {
@@ -50,6 +51,7 @@ public abstract class AbstractService<T> implements Service<T> {
 
     @Override
     public abstract List<T> getByUserId(Long userId, DAO<T> projectDao);
+
 
 
 

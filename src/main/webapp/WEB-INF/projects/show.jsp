@@ -22,9 +22,8 @@
             <td>${project.projectName}</td>
 
             <td>
-                <a href="${pageContext.request.contextPath}/users/${user.id}/projects/${project.id}">View</a> |
-                <a href="${pageContext.request.contextPath}/users/${user.id}/projects/${project.id}/edit">Edit</a> |
-                <form action="${pageContext.request.contextPath}/users/${user.id}/projects/${project.id}/delete" method="post" style="display:inline;">
+                <a href="${pageContext.request.contextPath}/users/${owner.id}/projects/${project.id}/edit">Edit</a>|
+                <form action="${pageContext.request.contextPath}/users/${owner.id}/projects/${project.id}/delete" method="post" style="display:inline;">
                     <button type="submit" onclick="return confirm('Are you sure?')">Delete</button>
                 </form>
             </td>
@@ -38,6 +37,6 @@
 <a href="${pageContext.request.contextPath}/projects/new">Create New Project</a>
 <br/>
 <br/>
-<a href="${pageContext.request.contextPath}/users">Back to List</a>
+<a href="${pageContext.request.contextPath}/users">Back to Users</a>
 </body>
 </html>

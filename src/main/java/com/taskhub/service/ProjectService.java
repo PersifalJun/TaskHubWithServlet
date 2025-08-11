@@ -3,6 +3,7 @@ package com.taskhub.service;
 import com.taskhub.dao.DAO;
 import com.taskhub.dao.ProjectDAO;
 
+import com.taskhub.dto.ProjectInfo;
 import com.taskhub.entity.Project;
 
 import java.util.List;
@@ -16,7 +17,6 @@ public class ProjectService extends AbstractService<Project> {
     }
 
 
-
     @Override
     public List<Project> getByUserId(Long userId, DAO<Project> projectDAO) {
 
@@ -27,5 +27,19 @@ public class ProjectService extends AbstractService<Project> {
 
     }
 
+    public Project create(ProjectInfo projectInfo) {
+        Project project = Project.builder()
+                .projectName(projectInfo.getProjectName())
+                .build();
+        return dao.save(project);
+    }
 
+
+    public Project edit(Long userId, ProjectInfo info) {
+        Project project = dao.getById(userId).orElseThrow(()->new RuntimeException("Not found"));
+        project.setProjectName(info.getProjectName());
+        return dao.update(project);
+
+
+    }
 }
