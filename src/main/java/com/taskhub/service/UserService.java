@@ -20,7 +20,6 @@ public class UserService extends AbstractService<User> {
 
 
 
-
     public User edit(Long userId, UserInfo info) {
         User user = dao.getById(userId).orElseThrow(()->new RuntimeException("Not found"));
         user.setUserName(info.getUserName());

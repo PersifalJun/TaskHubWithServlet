@@ -5,38 +5,30 @@
     <title>User Projects</title>
 </head>
 <body>
-<h2>Project Info</h2>
-
+<h2>Projects for User ${owner.id} (${owner.userName})</h2>
 
 <table border="1" cellpadding="5">
     <tr>
         <th>ID</th>
-        <th>Title</th>
+        <th>Name</th>
         <th>Actions</th>
     </tr>
-
-    <c:forEach var = "project" items = "${projects}">
-
+    <c:forEach var="project" items="${projects}">
         <tr>
             <td>${project.id}</td>
             <td>${project.projectName}</td>
-
             <td>
-                <a href="${pageContext.request.contextPath}/users/${owner.id}/projects/${project.id}/edit">Edit</a>|
-                <form action="${pageContext.request.contextPath}/users/${owner.id}/projects/${project.id}/delete" method="post" style="display:inline;">
+                <a href="${pageContext.request.contextPath}/users/${owner.id}/projects/${project.id}/edit">Edit</a> |
+                <a href ="${pageContext.request.contextPath}/users/${user.id}/taskList">TaskList</a> |
+                <form action="${pageContext.request.contextPath}/users/${project.owner.id}/projects/${project.id}/delete" method="post" style="display:inline;">
+                    <input type="hidden" name="_method" value="delete">
                     <button type="submit" onclick="return confirm('Are you sure?')">Delete</button>
                 </form>
             </td>
         </tr>
-
     </c:forEach>
-
 </table>
-<br/>
-<br/>
-<a href="${pageContext.request.contextPath}/projects/new">Create New Project</a>
-<br/>
-<br/>
-<a href="${pageContext.request.contextPath}/users">Back to Users</a>
+
+<a href="${pageContext.request.contextPath}/users/${owner.id}/projects/create">Create New Project</a>
 </body>
 </html>

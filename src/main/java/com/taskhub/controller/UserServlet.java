@@ -190,31 +190,41 @@ public class UserServlet extends HttpServlet {
     }
     @SneakyThrows
     private void showPersonalProjects(HttpServletRequest request, HttpServletResponse response) {
-
         Long userId = Util.extractUserId(request);
 
-        List<Project> projects = projectService.getByUserId(userId,projectDao);
+
+        List<Project> projects = projectService.getByUserId(userId, projectDao);
 
 
         request.setAttribute("projects", projects);
-        request.setAttribute("owner",  userService.getById(userId));
-        request.getRequestDispatcher("/WEB-INF/projects/show.jsp").forward(request, response);
+        request.setAttribute("owner", userService.getById(userId));
 
+        request.getRequestDispatcher("/WEB-INF/projects/show.jsp").forward(request, response);
     }
     @SneakyThrows
     private void editProjects(HttpServletRequest request, HttpServletResponse response) {
-        Long id = Util.extractUserId(request);
-        request.setAttribute("project", projectService.getById(Util.extractUserId(request)));
-        request.setAttribute("user", projectService.getById(id).getOwner());
+        Long userId = Util.extractUserId(request);
+        Long projectId = Util.extractProjectId(request);
+
+        Project project = projectService.getById(projectId);
+
+        if (project == null || project.getOwner() == null || !project.getOwner().getId().equals(userId)) {
+            response.sendError(HttpServletResponse.SC_NOT_FOUND, "Project not found for this user");
+            return;
+        }
+
+        request.setAttribute("project", project);
+        request.setAttribute("user", project.getOwner());
         request.getRequestDispatcher("/WEB-INF/projects/edit.jsp").forward(request, response);
     }
 
     @SneakyThrows
     private void updateProjects(HttpServletRequest request, HttpServletResponse response) {
         Long id = Util.extractUserId(request);
+        Long projectId = Util.extractProjectId(request);
         ProjectInfo info = new ProjectInfo(request.getParameter("projectName"));
 
-        ((ProjectService) projectService).edit(id, info);
+        ((ProjectService) projectService).edit(projectId, info);
 
         response.sendRedirect(request.getContextPath() + "/users/"+id+"/projects");
     }
@@ -233,20 +243,21 @@ public class UserServlet extends HttpServlet {
 
     @SneakyThrows
     private void deleteProjects(HttpServletRequest request, HttpServletResponse response) {
-        Long projectId = Util.extractProjectId(request);
         Long ownerId = Util.extractUserId(request);
+        Long projectId = Util.extractProjectId(request);
 
         Project project = projectService.getById(projectId);
-        if (isNull(project)) {
-            response.sendError(HttpServletResponse.SC_NOT_FOUND, "Project not found");
+        if (isNull(project) || !project.getOwner().getId().equals(ownerId)) {
+            response.sendError(HttpServletResponse.SC_NOT_FOUND, "Project not found or you don't have permission");
             return;
         }
 
-
         projectService.deleteById(projectId);
+
 
         response.sendRedirect(request.getContextPath() + "/users/" + ownerId + "/projects");
     }
+
 
 
 

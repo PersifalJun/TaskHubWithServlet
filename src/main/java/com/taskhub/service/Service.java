@@ -22,4 +22,6 @@ public interface Service<T> {
      int getAllCount();
 
     List<T> getByUserId(Long userId, DAO<T> projectDao);
+
+
 }

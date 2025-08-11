@@ -27,7 +27,6 @@
                 <a href="${pageContext.request.contextPath}/users/${user.id}">View</a> |
                 <a href="${pageContext.request.contextPath}/users/${user.id}/edit">Edit</a> |
                 <a href ="${pageContext.request.contextPath}/users/${user.id}/projects">Projects</a> |
-                <a href ="${pageContext.request.contextPath}/users/${user.id}/taskList">TaskList</a> |
                 <form action="${pageContext.request.contextPath}/users/${user.id}/delete" method="post" style="display:inline;">
                     <button type="submit" onclick="return confirm('Are you sure?')">Delete</button>
                 </form>

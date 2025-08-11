@@ -14,7 +14,7 @@ import java.util.List;
 @Table(name = "projects")
 public class Project {
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @Column(name = "name")
@@ -24,9 +24,9 @@ public class Project {
     @JoinColumn(name = "user_id")
     private User owner;
 
-    @OneToMany(mappedBy = "project",cascade = CascadeType.ALL,
+    @OneToOne(mappedBy = "project",cascade = CascadeType.ALL,
             fetch = FetchType.EAGER, orphanRemoval = true)
-    private List<TaskList> taskList;
+    private TaskList taskList;
 
 
 

@@ -6,7 +6,7 @@
 <body>
 <h2>Edit Project</h2>
 
-<form action="${pageContext.request.contextPath}/users/${project.owner.id}/projects/${project.id}/update" method="post">
+<form action="${pageContext.request.contextPath}/users/${user.id}/projects/${project.id}/update" method="post">
     <label>ProjectName:</label>
     <br>
     <input type="text" name="projectName" value="${project.projectName}" required>

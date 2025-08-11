@@ -23,7 +23,7 @@ public class ProjectDAO extends AbstractDAO<Project> {
         try{
             Session session = getCurrentSession();
             session.beginTransaction();
-            Query<Project> query = session.createNativeQuery("select * from projects where user_id = :userId", Project.class);
+            Query<Project> query = session.createNativeQuery("select * from projects where user_id = :userId order by id", Project.class);
             query.setParameter("userId", userId);
             projects = query.getResultList();
             session.getTransaction().commit();

@@ -27,6 +27,8 @@ public class ProjectService extends AbstractService<Project> {
 
     }
 
+
+
     public Project create(ProjectInfo projectInfo) {
         Project project = Project.builder()
                 .projectName(projectInfo.getProjectName())
@@ -35,8 +37,8 @@ public class ProjectService extends AbstractService<Project> {
     }
 
 
-    public Project edit(Long userId, ProjectInfo info) {
-        Project project = dao.getById(userId).orElseThrow(()->new RuntimeException("Not found"));
+    public Project edit(Long projectId, ProjectInfo info) {
+        Project project = dao.getById(projectId).orElseThrow(()->new RuntimeException("Not found"));
         project.setProjectName(info.getProjectName());
         return dao.update(project);
 
