@@ -30,10 +30,9 @@ public class User {
     @Column(name = "password")
     private String password;
 
-    @OneToMany(mappedBy = "owner" ,cascade = CascadeType.ALL,orphanRemoval = true,
-            fetch = FetchType.EAGER)
+    @OneToMany(mappedBy = "owner")
     private List<Project> projects;
 
-    @OneToMany(mappedBy = "author", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "author")
     private List<Comment> comments;
 }

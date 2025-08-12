@@ -5,6 +5,7 @@ import com.taskhub.dao.ProjectDAO;
 
 import com.taskhub.dto.ProjectInfo;
 import com.taskhub.entity.Project;
+import com.taskhub.entity.User;
 
 import java.util.List;
 
@@ -29,9 +30,10 @@ public class ProjectService extends AbstractService<Project> {
 
 
 
-    public Project create(ProjectInfo projectInfo) {
+    public Project create(ProjectInfo projectInfo, User owner) {
         Project project = Project.builder()
                 .projectName(projectInfo.getProjectName())
+                .owner(owner)
                 .build();
         return dao.save(project);
     }
@@ -44,4 +46,7 @@ public class ProjectService extends AbstractService<Project> {
 
 
     }
+
+
+
 }

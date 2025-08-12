@@ -3,7 +3,7 @@ package com.taskhub.entity;
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.util.List;
+
 
 @Entity
 @AllArgsConstructor
@@ -24,8 +24,7 @@ public class Project {
     @JoinColumn(name = "user_id")
     private User owner;
 
-    @OneToOne(mappedBy = "project",cascade = CascadeType.ALL,
-            fetch = FetchType.EAGER, orphanRemoval = true)
+    @OneToOne(mappedBy = "project",orphanRemoval = true,cascade = CascadeType.ALL)
     private TaskList taskList;
 
 

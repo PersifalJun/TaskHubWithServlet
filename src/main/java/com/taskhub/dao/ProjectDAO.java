@@ -3,6 +3,8 @@ package com.taskhub.dao;
 import com.taskhub.entity.Project;
 
 
+import com.taskhub.entity.Task;
+import org.hibernate.Hibernate;
 import org.hibernate.HibernateException;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
@@ -33,6 +35,8 @@ public class ProjectDAO extends AbstractDAO<Project> {
         }
         return projects;
     }
+
+
 
 
 }

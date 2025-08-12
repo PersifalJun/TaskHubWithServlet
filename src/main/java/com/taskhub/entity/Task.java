@@ -35,11 +35,10 @@ public class Task {
     private LocalDateTime deadline;
 
     @ManyToOne
-    @JoinColumn(name = "task_list_id" )
+    @JoinColumn(name = "task_list_id")
     private TaskList taskList;
 
-    @OneToMany(mappedBy = "task", cascade = CascadeType.ALL, orphanRemoval = true,
-            fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "task")
     private List<Comment> comments;
 
 }

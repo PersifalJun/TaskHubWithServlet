@@ -19,7 +19,7 @@
             <td>${project.projectName}</td>
             <td>
                 <a href="${pageContext.request.contextPath}/users/${owner.id}/projects/${project.id}/edit">Edit</a> |
-                <a href ="${pageContext.request.contextPath}/users/${user.id}/taskList">TaskList</a> |
+                <a href ="${pageContext.request.contextPath}/users/${owner.id}/taskList">TaskList</a> |
                 <form action="${pageContext.request.contextPath}/users/${project.owner.id}/projects/${project.id}/delete" method="post" style="display:inline;">
                     <input type="hidden" name="_method" value="delete">
                     <button type="submit" onclick="return confirm('Are you sure?')">Delete</button>
@@ -28,7 +28,14 @@
         </tr>
     </c:forEach>
 </table>
-
-<a href="${pageContext.request.contextPath}/users/${owner.id}/projects/create">Create New Project</a>
+<br>
+<br>
+<a href="${pageContext.request.contextPath}/users/${owner.id}/projects/new">Create New Project</a>
+<br>
+<br>
+<a href="${pageContext.request.contextPath}/users/${owner.id}">Check User</a>
+<br>
+<br>
+<a href="${pageContext.request.contextPath}/users/projects">All projects</a>
 </body>
 </html>

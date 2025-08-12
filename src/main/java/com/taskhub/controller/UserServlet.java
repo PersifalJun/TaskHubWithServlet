@@ -56,18 +56,21 @@ public class UserServlet extends HttpServlet {
         //Users
         if (isNull(path) || path.equals("/")) {
             index(request, response);
-        } else if (path.matches("/\\d+")) {
+        }
+        else if (path.matches("/\\d+")) {
             showUserProfile(request, response);
-        } else if (path.matches("/\\d+/edit")) {
+        }
+        else if (path.matches("/\\d+/edit")) {
             editUserProfile(request, response);
         }
         else if (path.equals("/new")) {
             request.getRequestDispatcher("/WEB-INF/users/new.jsp").forward(request, response);
         }
+
+
         //---------------------------------------//
         //Projects
-        //Все проекты
-        else if (path.equals("/projects")) {   //http://localhost:8081/users/projects
+        else if (path.equals("/projects")) {   //http://localhost:8081/users/projects -> all projects
             projectsIndex(request, response);
         }
         //Проекты конкретного пользователя
@@ -77,12 +80,16 @@ public class UserServlet extends HttpServlet {
         else if (path.matches("/\\d+/projects/\\d+/edit")) {
             editProjects(request, response);
         }
+        else if (path.matches("/\\d+/projects/new")) {
+            showCreateProjectForm(request, response);
+        }
+
         else {
             response.sendError(HttpServletResponse.SC_NOT_FOUND);
         }
 
-
     }
+
     @SneakyThrows
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) {
@@ -104,6 +111,9 @@ public class UserServlet extends HttpServlet {
         else if (path.matches("/\\d+/projects/\\d+/update")) {
            updateProjects(request, response);
         }
+        else if(path.matches("/\\d+/projects/create")){
+            createProject(request, response);
+        }
         else if (path.matches("/\\d+/projects/\\d+/delete")) {
             deleteProjects(request, response);
         }
@@ -111,7 +121,6 @@ public class UserServlet extends HttpServlet {
             response.sendError(HttpServletResponse.SC_NOT_FOUND);
         }
     }
-
 
 
 
@@ -191,24 +200,20 @@ public class UserServlet extends HttpServlet {
     @SneakyThrows
     private void showPersonalProjects(HttpServletRequest request, HttpServletResponse response) {
         Long userId = Util.extractUserId(request);
-
-
         List<Project> projects = projectService.getByUserId(userId, projectDao);
-
 
         request.setAttribute("projects", projects);
         request.setAttribute("owner", userService.getById(userId));
-
         request.getRequestDispatcher("/WEB-INF/projects/show.jsp").forward(request, response);
+
     }
     @SneakyThrows
     private void editProjects(HttpServletRequest request, HttpServletResponse response) {
         Long userId = Util.extractUserId(request);
         Long projectId = Util.extractProjectId(request);
-
         Project project = projectService.getById(projectId);
 
-        if (project == null || project.getOwner() == null || !project.getOwner().getId().equals(userId)) {
+        if (isNull(project) || isNull(project.getOwner()) || !project.getOwner().getId().equals(userId)) {
             response.sendError(HttpServletResponse.SC_NOT_FOUND, "Project not found for this user");
             return;
         }
@@ -222,8 +227,8 @@ public class UserServlet extends HttpServlet {
     private void updateProjects(HttpServletRequest request, HttpServletResponse response) {
         Long id = Util.extractUserId(request);
         Long projectId = Util.extractProjectId(request);
-        ProjectInfo info = new ProjectInfo(request.getParameter("projectName"));
 
+        ProjectInfo info = new ProjectInfo(request.getParameter("projectName"));
         ((ProjectService) projectService).edit(projectId, info);
 
         response.sendRedirect(request.getContextPath() + "/users/"+id+"/projects");
@@ -232,13 +237,32 @@ public class UserServlet extends HttpServlet {
     @SneakyThrows
     private void createProject(HttpServletRequest request, HttpServletResponse response) {
         String projectName = request.getParameter("projectName");
+        Long ownerId = Util.extractUserId(request);
+        User owner = userService.getById(ownerId);
+
         if(isNull(projectName) || projectName.isBlank()) {
             response.sendError(HttpServletResponse.SC_BAD_REQUEST, "All fields are required");
         }
         ProjectInfo projectInfo =  new ProjectInfo(projectName);
-        ((ProjectService) projectService).create(projectInfo);
+        ((ProjectService) projectService).create(projectInfo,owner);
 
-        response.sendRedirect(request.getContextPath() + "/projects");
+
+        response.sendRedirect(request.getContextPath() + "/users/" + ownerId + "/projects");
+
+    }
+
+    @SneakyThrows
+    private void showCreateProjectForm(HttpServletRequest request, HttpServletResponse response) {
+        Long ownerId = Util.extractUserId(request);
+        User owner = userService.getById(ownerId);
+
+        if (owner == null) {
+            response.sendError(HttpServletResponse.SC_NOT_FOUND, "User not found");
+            return;
+        }
+
+        request.setAttribute("owner", owner);
+        request.getRequestDispatcher("/WEB-INF/projects/new.jsp").forward(request, response);
     }
 
     @SneakyThrows
@@ -261,6 +285,8 @@ public class UserServlet extends HttpServlet {
 
 
 
+    //-----------------
+    //TaskList with tasks
 
 
 
@@ -271,7 +297,34 @@ public class UserServlet extends HttpServlet {
 
 
 
-    //Комментарии
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    //Comments
 
     private void commentsIndex(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 
@@ -281,7 +334,7 @@ public class UserServlet extends HttpServlet {
 
     }
 
-    //Список заданий
+
 
 
 

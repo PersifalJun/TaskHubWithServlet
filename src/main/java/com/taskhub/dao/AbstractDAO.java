@@ -129,7 +129,6 @@ public abstract class AbstractDAO<T> implements DAO<T> {
             final T entity = session.find(clazz, entityId);
             if (Objects.nonNull(entity)) {
                 session.remove(entity);
-                session.flush();
             }
             session.getTransaction().commit();
         } catch (Exception e) {

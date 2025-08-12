@@ -81,15 +81,15 @@ INSERT INTO projects (id, name, user_id) VALUES (10, 'Harrison-Martinez', 11);
 
 -- Insert task_lists
 INSERT INTO task_lists (id, title, project_id) VALUES (1, 'reality', 1);
-INSERT INTO task_lists (id, title, project_id) VALUES (2, 'example', 1);
-INSERT INTO task_lists (id, title, project_id) VALUES (3, 'skin', 2);
-INSERT INTO task_lists (id, title, project_id) VALUES (4, 'consider', 3);
-INSERT INTO task_lists (id, title, project_id) VALUES (5, 'but', 3);
-INSERT INTO task_lists (id, title, project_id) VALUES (6, 'hand', 4);
-INSERT INTO task_lists (id, title, project_id) VALUES (7, 'however', 5);
-INSERT INTO task_lists (id, title, project_id) VALUES (8, 'above', 5);
-INSERT INTO task_lists (id, title, project_id) VALUES (9, 'onto', 6);
-INSERT INTO task_lists (id, title, project_id) VALUES (10, 'mother', 6);
+INSERT INTO task_lists (id, title, project_id) VALUES (2, 'example', 2);
+INSERT INTO task_lists (id, title, project_id) VALUES (3, 'skin', 3);
+INSERT INTO task_lists (id, title, project_id) VALUES (4, 'consider', 4);
+INSERT INTO task_lists (id, title, project_id) VALUES (5, 'but', 5);
+INSERT INTO task_lists (id, title, project_id) VALUES (6, 'hand', 6);
+INSERT INTO task_lists (id, title, project_id) VALUES (7, 'however', 7);
+INSERT INTO task_lists (id, title, project_id) VALUES (8, 'above', 8);
+INSERT INTO task_lists (id, title, project_id) VALUES (9, 'onto', 9);
+INSERT INTO task_lists (id, title, project_id) VALUES (10, 'mother', 10);
 
 -- Insert tasks (partial, add all from user data)
 INSERT INTO tasks (id, title, description, completed, date_of_creation, deadline, task_list_id) VALUES (1, 'Development PM feel through.', 'Appear turn some. Position arrive spend.', TRUE, '2025-07-31 09:58:37', '2025-08-09 10:46:43', 8);
@@ -200,5 +200,6 @@ INSERT INTO comments (id, content, date_of_creation, user_id, task_id) VALUES (5
 INSERT INTO comments (id, content, date_of_creation, user_id, task_id) VALUES (55, 'Check the logic.', '2025-07-27 14:00:00', 5, 29);
 INSERT INTO comments (id, content, date_of_creation, user_id, task_id) VALUES (56, 'This could be optimized.', '2025-08-01 19:00:00', 9, 40);
 
--- SELECT setval('users_id_seq', (SELECT MAX(id) FROM users));
+ SELECT setval('users_id_seq', (SELECT MAX(id) FROM users));
+ SELECT setval('projects_id_seq', (SELECT MAX(id) FROM projects));
 

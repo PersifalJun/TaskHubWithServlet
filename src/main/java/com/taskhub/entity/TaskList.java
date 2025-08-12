@@ -24,8 +24,6 @@ public class TaskList {
     @JoinColumn(name = "project_id")
     private Project project;
 
-    @OneToMany(mappedBy = "taskList",cascade = CascadeType.ALL,fetch = FetchType.EAGER,
-            orphanRemoval = true)
-
+    @OneToMany(mappedBy = "taskList")
     private List<Task> tasks;
 }
