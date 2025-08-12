@@ -37,5 +37,9 @@
 <br/>
 <a href="${pageContext.request.contextPath}/users/new">Create New User</a>
 
+<br>
+<br>
+<a href = ${pageConext.requst.pathContext}/users/projects>All projects</a>
+
 </body>
 </html>

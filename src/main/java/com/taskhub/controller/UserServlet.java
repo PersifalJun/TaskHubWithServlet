@@ -33,7 +33,6 @@ import static java.util.Objects.isNull;
 public class UserServlet extends HttpServlet {
 
 
-
     private final SessionFactoryProvider sessionFactoryProvider;
     private final DAO<User> userDAO;
     private final DAO<Project> projectDao;
@@ -53,6 +52,7 @@ public class UserServlet extends HttpServlet {
     protected void doGet(HttpServletRequest request, HttpServletResponse response)  {
         String path = request.getPathInfo(); // например, /1, /new, /edit
 
+
         //Users
         if (isNull(path) || path.equals("/")) {
             index(request, response);
@@ -68,10 +68,11 @@ public class UserServlet extends HttpServlet {
         }
 
 
+
         //---------------------------------------//
         //Projects
         else if (path.equals("/projects")) {   //http://localhost:8081/users/projects -> all projects
-            projectsIndex(request, response);
+            showAllProjects(request, response);
         }
         //Проекты конкретного пользователя
         else if (path.matches("/\\d+/projects")) {
@@ -83,7 +84,6 @@ public class UserServlet extends HttpServlet {
         else if (path.matches("/\\d+/projects/new")) {
             showCreateProjectForm(request, response);
         }
-
         else {
             response.sendError(HttpServletResponse.SC_NOT_FOUND);
         }
@@ -94,6 +94,7 @@ public class UserServlet extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) {
         String path =  request.getPathInfo();
+
 
         //Users
         if (path.equals("/create")) {
@@ -121,6 +122,10 @@ public class UserServlet extends HttpServlet {
             response.sendError(HttpServletResponse.SC_NOT_FOUND);
         }
     }
+
+
+
+
 
 
 
@@ -188,10 +193,19 @@ public class UserServlet extends HttpServlet {
 
 
 
+
+
+
+
+
+
+
+
+
     //---------------------------------------//
     //Projects
     @SneakyThrows
-    private void projectsIndex(HttpServletRequest request, HttpServletResponse response) {
+    private void showAllProjects(HttpServletRequest request, HttpServletResponse response) {
 
         request.setAttribute("projects", projectService.getAll());
         request.getRequestDispatcher("/WEB-INF/projects/index.jsp").forward(request,response);
@@ -267,6 +281,7 @@ public class UserServlet extends HttpServlet {
 
     @SneakyThrows
     private void deleteProjects(HttpServletRequest request, HttpServletResponse response) {
+
         Long ownerId = Util.extractUserId(request);
         Long projectId = Util.extractProjectId(request);
 
@@ -275,9 +290,7 @@ public class UserServlet extends HttpServlet {
             response.sendError(HttpServletResponse.SC_NOT_FOUND, "Project not found or you don't have permission");
             return;
         }
-
         projectService.deleteById(projectId);
-
 
         response.sendRedirect(request.getContextPath() + "/users/" + ownerId + "/projects");
     }
@@ -285,54 +298,87 @@ public class UserServlet extends HttpServlet {
 
 
 
+
+
+
+
+
+
+
+
     //-----------------
     //TaskList with tasks
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    //Comments
-
-    private void commentsIndex(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-
-        request.setAttribute("comments",userService.getAll());
-        request.getRequestDispatcher("/WEB-INF/comments/index.jsp").forward(request, response);
-
+    @SneakyThrows
+    private void showAllTasks(HttpServletRequest request, HttpServletResponse response) {
 
     }
+
+    @SneakyThrows
+    private void showAllPersonalTasksInTaskList(HttpServletRequest request, HttpServletResponse response) {
+
+    }
+
+    @SneakyThrows
+    private void createTasks(HttpServletRequest request, HttpServletResponse response) {
+
+    }
+    @SneakyThrows
+    private void deleteTasks(HttpServletRequest request, HttpServletResponse response) {
+
+    }
+    @SneakyThrows
+    private void updateTasks(HttpServletRequest request, HttpServletResponse response) {
+
+    }
+
+    @SneakyThrows
+    private void editTasks(HttpServletRequest request, HttpServletResponse response) {
+
+    }
+
+
+    @SneakyThrows
+    private void showCreateTaskListForm(HttpServletRequest request, HttpServletResponse response){
+
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+    //--------------------------------------
+    //Comments
+    @SneakyThrows
+    private void showAllCommentsForTask(HttpServletRequest request, HttpServletResponse response)  {
+
+    }
+
+    @SneakyThrows
+    private void createComments(HttpServletRequest request, HttpServletResponse response) {
+
+    }
+
+    @SneakyThrows
+    private void deleteComments(HttpServletRequest request, HttpServletResponse response) {
+
+    }
+    @SneakyThrows
+    private void updateComments(HttpServletRequest request, HttpServletResponse response) {
+
+    }
+    @SneakyThrows
+    private void editComments(HttpServletRequest request, HttpServletResponse response) {
+
+    }
+
 
 
 
