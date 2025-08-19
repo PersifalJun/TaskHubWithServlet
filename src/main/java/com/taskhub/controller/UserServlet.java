@@ -13,16 +13,12 @@ import com.taskhub.service.ProjectService;
 import com.taskhub.service.Service;
 import com.taskhub.service.UserService;
 import com.taskhub.utils.Util;
-import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.SneakyThrows;
 
-
-
-import java.io.IOException;
 
 import java.util.List;
 
