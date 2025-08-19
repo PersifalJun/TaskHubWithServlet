@@ -94,7 +94,7 @@ public class UserServlet extends HttpServlet {
         else if (path.equals("/taskLists")) {   //http://localhost:8081/users/taskLists -> all taskLists
             showAllTaskLists(request, response);
         }
-        else if (path.matches("/\\d+/projects/\\d+/tasklist/\\d")) {
+        else if (path.matches("/\\d+/projects/\\d+/tasklist/?")) {
             showTasksInTaskListForProject(request, response);
         }
 
@@ -346,10 +346,10 @@ public class UserServlet extends HttpServlet {
         TaskList taskListForProject = ((TaskListService) taskListService).getByProjectId(projectId,taskListDao);
         List<Task> tasksInTaskList = ((TaskService) taskService).getByTaskListId(taskListForProject.getId(),taskDao);
 
-
+        request.setAttribute("taskListForProject", taskListForProject);
         request.setAttribute("tasksInTaskList", tasksInTaskList);
         request.setAttribute("project", project);
-        request.getRequestDispatcher("/WEB-INF/tasklists/show.jsp").forward(request, response);
+        request.getRequestDispatcher("/WEB-INF/taskLists/show.jsp").forward(request, response);
 
     }
 

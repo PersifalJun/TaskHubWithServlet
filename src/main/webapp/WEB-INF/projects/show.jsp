@@ -19,7 +19,7 @@
             <td>${project.projectName}</td>
             <td>
                 <a href="${pageContext.request.contextPath}/users/${owner.id}/projects/${project.id}/edit">Edit</a> |
-                <a href="${pageContext.request.contextPath}/users/${owner.id}/projects/${project.id}/tasklist/${taskList.id}">TaskList</a>|
+                <a href="${pageContext.request.contextPath}/users/${owner.id}/projects/${project.id}/tasklist/">TaskList</a>|
                 <form action="${pageContext.request.contextPath}/users/${project.owner.id}/projects/${project.id}/delete" method="post" style="display:inline;">
                     <input type="hidden" name="_method" value="delete">
                     <button type="submit" onclick="return confirm('Are you sure?')">Delete</button>
