@@ -2,16 +2,14 @@ package com.taskhub.controller;
 
 import com.taskhub.config.PropertiesSessionFactoryProvider;
 import com.taskhub.config.SessionFactoryProvider;
-import com.taskhub.dao.DAO;
-import com.taskhub.dao.ProjectDAO;
-import com.taskhub.dao.UserDAO;
+import com.taskhub.dao.*;
 import com.taskhub.dto.ProjectInfo;
 import com.taskhub.dto.UserInfo;
 import com.taskhub.entity.Project;
+import com.taskhub.entity.Task;
+import com.taskhub.entity.TaskList;
 import com.taskhub.entity.User;
-import com.taskhub.service.ProjectService;
-import com.taskhub.service.Service;
-import com.taskhub.service.UserService;
+import com.taskhub.service.*;
 import com.taskhub.utils.Util;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
@@ -28,19 +26,26 @@ import static java.util.Objects.isNull;
 @WebServlet(name = "UserServlet", value = "/users*")
 public class UserServlet extends HttpServlet {
 
-
     private final SessionFactoryProvider sessionFactoryProvider;
     private final DAO<User> userDAO;
     private final DAO<Project> projectDao;
+    private final DAO<TaskList> taskListDao;
+    private final DAO<Task> taskDao;
+    private final Service<Task> taskService;
     private final Service<User> userService;
     private final Service<Project> projectService;
+    private final Service<TaskList> taskListService;
 
     public UserServlet() {
         sessionFactoryProvider = new PropertiesSessionFactoryProvider();
         userDAO = new UserDAO(sessionFactoryProvider.getSessionFactory());
         projectDao = new ProjectDAO(sessionFactoryProvider.getSessionFactory());
+        taskListDao = new TaskListDAO(sessionFactoryProvider.getSessionFactory());
+        taskDao = new TaskDAO(sessionFactoryProvider.getSessionFactory());
         userService = new UserService(userDAO);
         projectService = new ProjectService(projectDao);
+        taskListService = new TaskListService(taskListDao);
+        taskService = new TaskService(taskDao);
     }
 
     @SneakyThrows
@@ -80,6 +85,21 @@ public class UserServlet extends HttpServlet {
         else if (path.matches("/\\d+/projects/new")) {
             showCreateProjectForm(request, response);
         }
+
+        //Tasks and TaskLists
+
+        else if (path.equals("/tasks")) {   //http://localhost:8081/users/tasks -> all tasks
+            showAllTasks(request, response);
+        }
+        else if (path.equals("/taskLists")) {   //http://localhost:8081/users/taskLists -> all taskLists
+            showAllTaskLists(request, response);
+        }
+        else if (path.matches("/\\d+/projects/\\d+/tasklist/\\d")) {
+            showTasksInTaskListForProject(request, response);
+        }
+
+
+
         else {
             response.sendError(HttpServletResponse.SC_NOT_FOUND);
         }
@@ -266,7 +286,7 @@ public class UserServlet extends HttpServlet {
         Long ownerId = Util.extractUserId(request);
         User owner = userService.getById(ownerId);
 
-        if (owner == null) {
+        if (isNull(owner)) {
             response.sendError(HttpServletResponse.SC_NOT_FOUND, "User not found");
             return;
         }
@@ -307,10 +327,29 @@ public class UserServlet extends HttpServlet {
     @SneakyThrows
     private void showAllTasks(HttpServletRequest request, HttpServletResponse response) {
 
+        request.setAttribute("tasks", taskService.getAll());
+        request.getRequestDispatcher("/WEB-INF/tasks/index.jsp").forward(request, response);
+
     }
 
+
     @SneakyThrows
-    private void showAllPersonalTasksInTaskList(HttpServletRequest request, HttpServletResponse response) {
+    private void showAllTaskLists(HttpServletRequest request, HttpServletResponse response) {
+        request.setAttribute("taskLists", taskListService.getAll());
+        request.getRequestDispatcher("/WEB-INF/taskLists/index.jsp").forward(request, response);
+
+    }
+    @SneakyThrows
+    private void showTasksInTaskListForProject(HttpServletRequest request, HttpServletResponse response) {
+        Long projectId = Util.extractProjectId(request);
+        Project project = projectService.getById(projectId);
+        TaskList taskListForProject = ((TaskListService) taskListService).getByProjectId(projectId,taskListDao);
+        List<Task> tasksInTaskList = ((TaskService) taskService).getByTaskListId(taskListForProject.getId(),taskDao);
+
+
+        request.setAttribute("tasksInTaskList", tasksInTaskList);
+        request.setAttribute("project", project);
+        request.getRequestDispatcher("/WEB-INF/tasklists/show.jsp").forward(request, response);
 
     }
 

@@ -1,11 +1,14 @@
 package com.taskhub.service;
 
 import com.taskhub.dao.DAO;
+import com.taskhub.dao.ProjectDAO;
 import com.taskhub.dao.TaskDAO;
 
+import com.taskhub.dao.TaskListDAO;
 import com.taskhub.dto.TaskInfo;
 
 import com.taskhub.entity.Task;
+import com.taskhub.entity.TaskList;
 
 import java.util.List;
 
@@ -17,7 +20,7 @@ public class TaskService extends AbstractService<Task> {
     }
 
     @Override
-    public List<Task> getByUserId(Long userId, DAO<Task> projectDao) {
+    public List<Task> getByUserId(Long userId, DAO<Task> dao) {
         return List.of();
     }
 
@@ -44,5 +47,12 @@ public class TaskService extends AbstractService<Task> {
         task.setDeadline(info.getDeadline());
         return dao.save(task);
     }
+     public List<Task> getByTaskListId(Long taskListId, DAO<Task> taskDAO) {
+         if (!(taskDAO instanceof TaskDAO)) {
+             throw new IllegalArgumentException("Invalid DAO provided");
+         }
+         return ((TaskDAO) taskDAO).getTasksByTaskListId(taskListId);
+    }
+
 
 }

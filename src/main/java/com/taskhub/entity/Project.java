@@ -27,8 +27,9 @@ public class Project {
     @OneToOne(mappedBy = "project",orphanRemoval = true,cascade = CascadeType.ALL)
     private TaskList taskList;
 
-
-
-
+    @Override
+    public String toString() {
+        return "Project id: " + this.id;
+    }
 
 }

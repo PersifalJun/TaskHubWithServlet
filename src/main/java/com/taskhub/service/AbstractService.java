@@ -50,7 +50,7 @@ public abstract class AbstractService<T> implements Service<T> {
     }
 
     @Override
-    public abstract List<T> getByUserId(Long userId, DAO<T> projectDao);
+    public abstract List<T> getByUserId(Long userId, DAO<T> dao);
 
 
 

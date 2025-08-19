@@ -1,13 +1,12 @@
 package com.taskhub.entity;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.util.List;
 
-@Data
+@Getter
+@Setter
 @Entity
 @AllArgsConstructor
 @NoArgsConstructor
@@ -24,6 +23,11 @@ public class TaskList {
     @JoinColumn(name = "project_id")
     private Project project;
 
-    @OneToMany(mappedBy = "taskList")
+    @OneToMany(mappedBy = "taskList",fetch = FetchType.EAGER)
     private List<Task> tasks;
+
+    @Override
+    public String toString() {
+        return "TaskList{id=" + id + ", title='" + title + "'}";
+    }
 }

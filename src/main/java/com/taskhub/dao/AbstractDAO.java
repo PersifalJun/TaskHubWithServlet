@@ -64,7 +64,7 @@ public abstract class AbstractDAO<T> implements DAO<T> {
         Session session = getCurrentSession();
         try {
             session.beginTransaction();
-            result = session.createQuery("from " + clazz.getName() + " e ORDER BY e.id ASC", clazz).list();
+            result = session.createQuery("from " + clazz.getName() + " e  ORDER BY e.id ASC", clazz).list();
             session.getTransaction().commit();
         } catch (Exception e) {
             session.getTransaction().rollback();

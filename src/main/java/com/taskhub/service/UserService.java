@@ -14,10 +14,9 @@ public class UserService extends AbstractService<User> {
     }
 
     @Override
-    public List<User> getByUserId(Long userId, DAO<User> projectDao) {
+    public List<User> getByUserId(Long userId, DAO<User> dao) {
         return List.of();
     }
-
 
 
     public User edit(Long userId, UserInfo info) {
@@ -37,7 +36,5 @@ public class UserService extends AbstractService<User> {
 
         return dao.save(user);
     }
-
-
 
 }

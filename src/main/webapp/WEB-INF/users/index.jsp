@@ -40,6 +40,12 @@
 <br>
 <br>
 <a href = ${pageConext.requst.pathContext}/users/projects>All projects</a>
+<br>
+<br>
+<a href = ${pageConext.requst.pathContext}/users/tasks>All tasks</a>
+<br>
+<br>
+<a href = ${pageConext.requst.pathContext}/users/taskLists>All taskLists</a>
 
 </body>
 </html>

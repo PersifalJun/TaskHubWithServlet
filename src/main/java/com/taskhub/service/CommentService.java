@@ -13,7 +13,7 @@ public class CommentService extends AbstractService<Comment> {
     }
 
     @Override
-    public List<Comment> getByUserId(Long userId, DAO<Comment> projectDao) {
+    public List<Comment> getByUserId(Long userId, DAO<Comment> dao) {
         return List.of();
     }
 
