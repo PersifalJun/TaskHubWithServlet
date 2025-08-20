@@ -34,4 +34,18 @@ public class Util {
         throw new IllegalArgumentException("Project ID not found in path: " + path);
     }
 
+    public static Long extractTaskListId(HttpServletRequest request) {
+        String path = request.getPathInfo();
+        if (isNull(path)) {
+            throw new IllegalArgumentException("Path is null");
+        }
+        String[] parts = path.split("/");
+        for (int i = 0; i < parts.length - 1; i++) {
+            if ("tasklist".equals(parts[i]) && parts[i + 1].matches("\\d+")) {
+                return Long.parseLong(parts[i + 1]);
+            }
+        }
+        throw new IllegalArgumentException("TaskList ID not found in path: " + path);
+    }
+
 }

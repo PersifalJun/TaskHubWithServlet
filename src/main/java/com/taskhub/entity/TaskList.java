@@ -10,6 +10,7 @@ import java.util.List;
 @Entity
 @AllArgsConstructor
 @NoArgsConstructor
+@Builder
 @Table(name = "task_lists")
 public class TaskList {
     @Id

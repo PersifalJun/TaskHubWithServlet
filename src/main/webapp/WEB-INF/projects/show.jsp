@@ -19,7 +19,12 @@
             <td>${project.projectName}</td>
             <td>
                 <a href="${pageContext.request.contextPath}/users/${owner.id}/projects/${project.id}/edit">Edit</a> |
-                <a href="${pageContext.request.contextPath}/users/${owner.id}/projects/${project.id}/tasklist/">TaskList</a>|
+                <c:if test="${taskListIds[project.id] != null}">
+                    <a href="${pageContext.request.contextPath}/users/${owner.id}/projects/${project.id}/tasklist/${taskListIds[project.id]}">TaskList</a> |
+                </c:if>
+                <c:if test="${taskListIds[project.id] == null}">
+                    <a href="${pageContext.request.contextPath}/users/${owner.id}/projects/${project.id}/newTaskList">Create TaskList</a> |
+                </c:if>
                 <form action="${pageContext.request.contextPath}/users/${project.owner.id}/projects/${project.id}/delete" method="post" style="display:inline;">
                     <input type="hidden" name="_method" value="delete">
                     <button type="submit" onclick="return confirm('Are you sure?')">Delete</button>

@@ -10,7 +10,7 @@
 <table border="1" cellpadding="5">
     <tr>
         <th>ID</th>
-        <th>Title</th>
+        <th>Title of task</th>
         <th>Description</th>
         <th>Completed</th>
         <th>Date of creation</th>
@@ -37,12 +37,20 @@
 </table>
 <br>
 <br>
-<a href="${pageContext.request.contextPath}/users/${owner.id}/projects/new">Create New Project</a>
+<a href="${pageContext.request.contextPath}/users/${owner.id}/projects/${project.id}/tasklist/${taskList.id}/edit">Edit TaskList</a>
+<br>
+<br>
+<a href="${pageContext.request.contextPath}/users/${owner.id}/projects/${project.id}/tasklist/${taskList.id}/newTask">Create Task</a>
 <br>
 <br>
 <a href="${pageContext.request.contextPath}/users/${owner.id}">Check User</a>
 <br>
 <br>
 <a href="${pageContext.request.contextPath}/users/projects">All projects</a>
+<br>
+<br>
+<a href="${pageContext.request.contextPath}/users/projects">Back to Users</a>
 </body>
 </html>
+
+
