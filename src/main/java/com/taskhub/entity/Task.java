@@ -2,6 +2,7 @@ package com.taskhub.entity;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -13,6 +14,7 @@ import java.util.List;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
+@Builder
 @Table(name = "tasks")
 public class Task {
     @Id
@@ -35,7 +37,7 @@ public class Task {
     private LocalDateTime deadline;
 
     @ManyToOne
-    @JoinColumn(name = "task_list_id")
+    @JoinColumn(name = "task_list_id",nullable = false)
     private TaskList taskList;
 
     @OneToMany(mappedBy = "task")

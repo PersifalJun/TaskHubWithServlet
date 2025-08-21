@@ -11,12 +11,16 @@ import com.taskhub.entity.Project;
 import com.taskhub.entity.TaskList;
 
 import java.util.List;
+import java.util.Objects;
 
 
 public class TaskListService extends AbstractService<TaskList> {
 
+
+
     public TaskListService(DAO<TaskList> taskListDAO) {
         super(taskListDAO);
+
     }
 
     @Override
@@ -46,6 +50,7 @@ public class TaskListService extends AbstractService<TaskList> {
 
 
     }
+
 
 
 

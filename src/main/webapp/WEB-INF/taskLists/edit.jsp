@@ -6,7 +6,7 @@
 <body>
 <h2>Edit TaskList</h2>
 
-<form action="${pageContext.request.contextPath}/users/${user.id}/projects/${project.id}/tasklist/${taskList.id}/update" method="post">
+<form action="${pageContext.request.contextPath}/users/${user.id}/projects/${project.id}/taskList/${taskList.id}/update" method="post">
     <label>Title:</label>
     <br>
     <input type="text" name="title" value="${taskList.title}" required>

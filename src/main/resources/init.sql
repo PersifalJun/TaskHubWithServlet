@@ -203,5 +203,15 @@ INSERT INTO comments (id, content, date_of_creation, user_id, task_id) VALUES (5
  SELECT setval('users_id_seq', (SELECT MAX(id) FROM users));
  SELECT setval('projects_id_seq', (SELECT MAX(id) FROM projects));
  SELECT setval('task_lists_id_seq', (SELECT MAX(id) FROM projects));
+ SELECT setval('tasks_id_seq', (SELECT MAX(id) FROM tasks));
 
-DELETE FROM task_lists t where t.id = 18
+
+
+
+-- DELETE FROM task_lists t where t.id = 18;
+--
+-- SELECT * FROM tasks WHERE task_list_id = 10;
+--
+-- DELETE FROM projects p where p.id = 20;
+--
+-- DELETE FROM tasks t where t.id = 52;

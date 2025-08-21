@@ -41,7 +41,21 @@ public class Util {
         }
         String[] parts = path.split("/");
         for (int i = 0; i < parts.length - 1; i++) {
-            if ("tasklist".equals(parts[i]) && parts[i + 1].matches("\\d+")) {
+            if ("taskList".equals(parts[i]) && parts[i + 1].matches("\\d+")) {
+                return Long.parseLong(parts[i + 1]);
+            }
+        }
+        throw new IllegalArgumentException("TaskList ID not found in path: " + path);
+    }
+
+    public static Long extractTaskId(HttpServletRequest request) {
+        String path = request.getPathInfo();
+        if (isNull(path)) {
+            throw new IllegalArgumentException("Path is null");
+        }
+        String[] parts = path.split("/");
+        for (int i = 0; i < parts.length - 1; i++) {
+            if ("task".equals(parts[i]) && parts[i + 1].matches("\\d+")) {
                 return Long.parseLong(parts[i + 1]);
             }
         }

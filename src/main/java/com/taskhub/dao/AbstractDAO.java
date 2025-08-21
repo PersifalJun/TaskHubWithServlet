@@ -64,7 +64,7 @@ public abstract class AbstractDAO<T> implements DAO<T> {
         Session session = getCurrentSession();
         try {
             session.beginTransaction();
-            result = session.createQuery("from " + clazz.getName() + " e  ORDER BY e.id ASC", clazz).list();
+            result = session.createQuery("select distinct e from " + clazz.getName() + " e  ORDER BY e.id ASC", clazz).list();
             session.getTransaction().commit();
         } catch (Exception e) {
             session.getTransaction().rollback();
@@ -125,14 +125,17 @@ public abstract class AbstractDAO<T> implements DAO<T> {
             session.beginTransaction();
             if (Objects.isNull(entityId)) {
                 throw new RuntimeException("Nothing to delete");
+
             }
             final T entity = session.find(clazz, entityId);
             if (Objects.nonNull(entity)) {
                 session.remove(entity);
             }
             session.getTransaction().commit();
+
         } catch (Exception e) {
             session.getTransaction().rollback();
+            e.printStackTrace();
             throw new HibernateException("Deletion by id was failed", e);
         }
     }

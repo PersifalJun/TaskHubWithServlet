@@ -29,7 +29,9 @@
     </c:forEach>
 
 </table>
-
+<br>
+<br>
+<a href="${pageContext.request.contextPath}/users">Cancel</a>
 
 </body>
 </html>

@@ -25,6 +25,7 @@ public class Project {
     private User owner;
 
     @OneToOne(mappedBy = "project",orphanRemoval = true,cascade = CascadeType.ALL)
+    @JoinColumn(name = "task_list_id",unique = true)
     private TaskList taskList;
 
     @Override

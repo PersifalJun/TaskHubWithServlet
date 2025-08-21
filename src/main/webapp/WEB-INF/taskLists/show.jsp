@@ -5,7 +5,7 @@
     <title>Project TaskList</title>
 </head>
 <body>
-<h2>TaskList for Project ${project.id}</h2>
+<h2>TaskList ${taskList.title} for Project ${project.id}</h2>
 
 <table border="1" cellpadding="5">
     <tr>
@@ -26,8 +26,9 @@
             <td>${task.creationDate}</td>
             <td>${task.deadline}</td>
             <td>
-                <a href="${pageContext.request.contextPath}/users/${project.owner.id}/projects/${project.id}/tasklist/${task.taskList.id}/task/${task.id}/edit">Edit</a> |
-                <form action="${pageContext.request.contextPath}/users/${project.owner.id}/projects/${project.id}/tasklist/${task.taskList.id}/task/${task.id}/delete" method="post" style="display:inline;">
+                <a href="${pageContext.request.contextPath}/users/${owner.id}/projects/${project.id}/taskList/${taskList.id}/task/${task.id}">View</a> |
+                <a href="${pageContext.request.contextPath}/users/${owner.id}/projects/${project.id}/taskList/${taskList.id}/task/${task.id}/edit">Edit</a> |
+                <form action="${pageContext.request.contextPath}/users/${owner.id}/projects/${project.id}/taskList/${taskList.id}/task/${task.id}/delete" method="post" style="display:inline;">
                     <input type="hidden" name="_method" value="delete">
                     <button type="submit" onclick="return confirm('Are you sure?')">Delete</button>
                 </form>
@@ -37,19 +38,25 @@
 </table>
 <br>
 <br>
-<a href="${pageContext.request.contextPath}/users/${owner.id}/projects/${project.id}/tasklist/${taskList.id}/edit">Edit TaskList</a>
+<a href="${pageContext.request.contextPath}/users/${owner.id}/projects">Cancel</a>
 <br>
 <br>
-<a href="${pageContext.request.contextPath}/users/${owner.id}/projects/${project.id}/tasklist/${taskList.id}/newTask">Create Task</a>
+<a href="${pageContext.request.contextPath}/users/${owner.id}/projects/${project.id}/taskList/${taskList.id}/edit">Edit TaskList</a>
+<br>
+<br>
+<a href="${pageContext.request.contextPath}/users/${owner.id}/projects/${project.id}/taskList/${taskList.id}/newTask">Create Task</a>
 <br>
 <br>
 <a href="${pageContext.request.contextPath}/users/${owner.id}">Check User</a>
 <br>
 <br>
-<a href="${pageContext.request.contextPath}/users/projects">All projects</a>
+<a href="${pageContext.request.contextPath}/users">Back to Users</a>
 <br>
 <br>
-<a href="${pageContext.request.contextPath}/users/projects">Back to Users</a>
+<form action="${pageContext.request.contextPath}/users/${owner.id}/projects/${project.id}/taskList/${taskList.id}/delete" method="post" style="display:inline;">
+    <input type="hidden" name="_method" value="delete">
+    <button type="submit" onclick="return confirm('Are you sure?')">Delete TaskList</button>
+</form>
 </body>
 </html>
 

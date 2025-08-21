@@ -12,7 +12,7 @@ import java.time.LocalDateTime;
 public class TaskInfo {
     private String title;
     private String description;
-    private boolean completed;
-    private LocalDateTime creationDate;
-    private LocalDateTime deadline;
+    private String completed;
+    private String creationDate;
+    private String deadline;
 }

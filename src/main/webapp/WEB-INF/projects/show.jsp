@@ -20,7 +20,7 @@
             <td>
                 <a href="${pageContext.request.contextPath}/users/${owner.id}/projects/${project.id}/edit">Edit</a> |
                 <c:if test="${taskListIds[project.id] != null}">
-                    <a href="${pageContext.request.contextPath}/users/${owner.id}/projects/${project.id}/tasklist/${taskListIds[project.id]}">TaskList</a> |
+                    <a href="${pageContext.request.contextPath}/users/${owner.id}/projects/${project.id}/taskList/${taskListIds[project.id]}">TaskList</a> |
                 </c:if>
                 <c:if test="${taskListIds[project.id] == null}">
                     <a href="${pageContext.request.contextPath}/users/${owner.id}/projects/${project.id}/newTaskList">Create TaskList</a> |
