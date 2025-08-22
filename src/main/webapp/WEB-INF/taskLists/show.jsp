@@ -28,6 +28,7 @@
             <td>
                 <a href="${pageContext.request.contextPath}/users/${owner.id}/projects/${project.id}/taskList/${taskList.id}/task/${task.id}">View</a> |
                 <a href="${pageContext.request.contextPath}/users/${owner.id}/projects/${project.id}/taskList/${taskList.id}/task/${task.id}/edit">Edit</a> |
+                <a href="${pageContext.request.contextPath}/users/${owner.id}/projects/${project.id}/taskList/${taskList.id}/task/${task.id}/comments">Show Comments</a> |
                 <form action="${pageContext.request.contextPath}/users/${owner.id}/projects/${project.id}/taskList/${taskList.id}/task/${task.id}/delete" method="post" style="display:inline;">
                     <input type="hidden" name="_method" value="delete">
                     <button type="submit" onclick="return confirm('Are you sure?')">Delete</button>

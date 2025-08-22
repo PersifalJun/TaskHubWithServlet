@@ -3,14 +3,8 @@ package com.taskhub.controller;
 import com.taskhub.config.PropertiesSessionFactoryProvider;
 import com.taskhub.config.SessionFactoryProvider;
 import com.taskhub.dao.*;
-import com.taskhub.dto.ProjectInfo;
-import com.taskhub.dto.TaskInfo;
-import com.taskhub.dto.TaskListInfo;
-import com.taskhub.dto.UserInfo;
-import com.taskhub.entity.Project;
-import com.taskhub.entity.Task;
-import com.taskhub.entity.TaskList;
-import com.taskhub.entity.User;
+import com.taskhub.dto.*;
+import com.taskhub.entity.*;
 import com.taskhub.service.*;
 import com.taskhub.utils.Util;
 import jakarta.servlet.annotation.WebServlet;
@@ -30,24 +24,29 @@ public class UserServlet extends HttpServlet {
 
     private final SessionFactoryProvider sessionFactoryProvider;
     private final DAO<User> userDAO;
-    private final DAO<Project> projectDao;
-    private final DAO<TaskList> taskListDao;
-    private final DAO<Task> taskDao;
+    private final DAO<Project> projectDAO;
+    private final DAO<TaskList> taskListDAO;
+    private final DAO<Task> taskDAO;
+    private final DAO<Comment> commentDAO;
     private final Service<Task> taskService;
     private final Service<User> userService;
     private final Service<Project> projectService;
     private final Service<TaskList> taskListService;
+    private final Service<Comment> commentService;
 
     public UserServlet() {
         sessionFactoryProvider = new PropertiesSessionFactoryProvider();
         userDAO = new UserDAO(sessionFactoryProvider.getSessionFactory());
-        projectDao = new ProjectDAO(sessionFactoryProvider.getSessionFactory());
-        taskListDao = new TaskListDAO(sessionFactoryProvider.getSessionFactory());
-        taskDao = new TaskDAO(sessionFactoryProvider.getSessionFactory());
+        projectDAO = new ProjectDAO(sessionFactoryProvider.getSessionFactory());
+        taskListDAO= new TaskListDAO(sessionFactoryProvider.getSessionFactory());
+        taskDAO = new TaskDAO(sessionFactoryProvider.getSessionFactory());
+        commentDAO = new CommentDAO(sessionFactoryProvider.getSessionFactory());
         userService = new UserService(userDAO);
-        projectService = new ProjectService(projectDao);
-        taskListService = new TaskListService(taskListDao);
-        taskService = new TaskService(taskDao);
+        projectService = new ProjectService(projectDAO);
+        taskListService = new TaskListService(taskListDAO);
+        taskService = new TaskService(taskDAO);
+        commentService = new CommentService(commentDAO);
+
     }
 
     @SneakyThrows
@@ -61,7 +60,7 @@ public class UserServlet extends HttpServlet {
 
 
         //Users
-        if (isNull(path) || path.equals("/")) {
+        if (isNull(path) || path.equals("/")) { //all users
             index(request, response);
         }
         else if (path.matches("/\\d+")) {
@@ -133,12 +132,31 @@ public class UserServlet extends HttpServlet {
         else if (path.matches("/\\d+/projects/\\d+/taskList/\\d+/task/\\d+")) {
             showTask(request, response);
         }
-        else if (path.matches("/\\d+/projects/\\d+/taskList/\\d+/newTask")) {   //http://localhost:8081/users/tasks -> all tasks
+        else if (path.matches("/\\d+/projects/\\d+/taskList/\\d+/newTask")) {
             showCreateTaskForm(request, response);
         }
         else if (path.matches("/\\d+/projects/\\d+/taskList/\\d+/task/\\d+/edit")) {
             editTask(request, response);
         }
+
+
+
+
+
+        //---------------------------------------//
+        //Comments
+        else if (path.equals("/comments")) {   //http://localhost:8081/users/comments -> all comments
+            showAllComments(request, response);
+        }
+        else if (path.matches("/\\d+/projects/\\d+/taskList/\\d+/task/\\d+/comments")) {
+            showCommentsForTask(request, response);
+        }
+        else if (path.matches("/\\d+/projects/\\d+/taskList/\\d+/task/\\d+/comments/newComment")) {
+            showCreateCommentForm(request, response);
+        }
+
+
+
         else {
             response.sendError(HttpServletResponse.SC_NOT_FOUND);
         }
@@ -198,9 +216,7 @@ public class UserServlet extends HttpServlet {
         else if (path.matches("/\\d+/projects/\\d+/taskList/\\d+/delete")) {
             deleteTaskList(request, response);
         }
-        else if(path.matches("/\\d+/projects/\\d+/taskList/\\d+/createTask")){
-            createTask(request, response);
-        }
+
 
 
 
@@ -214,8 +230,15 @@ public class UserServlet extends HttpServlet {
         else if (path.matches("/\\d+/projects/\\d+/taskList/\\d+/task/\\d+/delete")) {
             deleteTask(request, response);
         }
+        else if(path.matches("/\\d+/projects/\\d+/taskList/\\d+/createTask")){
+            createTask(request, response);
+        }
 
-
+        //---------------------------------------//
+        //Comments
+        else if(path.matches("/\\d+/projects/\\d+/taskList/\\d+/task/\\d+/comments/createComment")){
+            createComment(request, response);
+        }
 
 
         else {
@@ -283,17 +306,13 @@ public class UserServlet extends HttpServlet {
     @SneakyThrows
     private void update(HttpServletRequest request, HttpServletResponse response) {
 
-        Long id = Util.extractUserId(request);
         UserInfo info = new UserInfo(request.getParameter("userName"),
                 request.getParameter("password"),request.getParameter("email"));
 
-        ((UserService) userService).edit(id, info);
+        ((UserService) userService).edit(Util.extractUserId(request), info);
 
         response.sendRedirect(request.getContextPath() + "/users");
     }
-
-
-
 
 
 
@@ -315,13 +334,13 @@ public class UserServlet extends HttpServlet {
     @SneakyThrows
     private void showPersonalProjects(HttpServletRequest request, HttpServletResponse response) {
         Long userId = Util.extractUserId(request);
-        List<Project> projects = projectService.getByUserId(userId, projectDao);
+        List<Project> projects = projectService.getByUserId(userId, projectDAO);
 
 
         //Map for Project and TaskList
         Map<Long, Long> taskListIds = new HashMap<>();
         for (Project project : projects) {
-            TaskList taskList = ((TaskListService) taskListService).getByProjectId(project.getId(), taskListDao);
+            TaskList taskList = ((TaskListService) taskListService).getByProjectId(project.getId(), taskListDAO);
             if (Objects.nonNull(taskList)) {
                 taskListIds.put(project.getId(), taskList.getId());
             }
@@ -335,14 +354,8 @@ public class UserServlet extends HttpServlet {
     }
     @SneakyThrows
     private void editProjects(HttpServletRequest request, HttpServletResponse response) {
-        Long userId = Util.extractUserId(request);
         Long projectId = Util.extractProjectId(request);
         Project project = projectService.getById(projectId);
-
-        if (isNull(project) || isNull(project.getOwner()) || !project.getOwner().getId().equals(userId)) {
-            response.sendError(HttpServletResponse.SC_NOT_FOUND, "Project not found for this user");
-            return;
-        }
 
         request.setAttribute("project", project);
         request.setAttribute("user", project.getOwner());
@@ -351,60 +364,39 @@ public class UserServlet extends HttpServlet {
 
     @SneakyThrows
     private void updateProjects(HttpServletRequest request, HttpServletResponse response) {
-        Long id = Util.extractUserId(request);
-        Long projectId = Util.extractProjectId(request);
 
         ProjectInfo info = new ProjectInfo(request.getParameter("projectName"));
-        ((ProjectService) projectService).edit(projectId, info);
+        ((ProjectService) projectService).edit(Util.extractProjectId(request), info);
 
-        response.sendRedirect(request.getContextPath() + "/users/"+id+"/projects");
+        response.sendRedirect(request.getContextPath() + "/users/"+ Util.extractUserId(request)+ "/projects");
     }
 
     @SneakyThrows
     private void createProject(HttpServletRequest request, HttpServletResponse response) {
-        String projectName = request.getParameter("projectName");
-        Long ownerId = Util.extractUserId(request);
-        User owner = userService.getById(ownerId);
 
+        String projectName = request.getParameter("projectName");
         if(isNull(projectName) || projectName.isBlank()) {
             response.sendError(HttpServletResponse.SC_BAD_REQUEST, "All fields are required");
         }
         ProjectInfo projectInfo =  new ProjectInfo(projectName);
-        ((ProjectService) projectService).create(projectInfo,owner);
+        ((ProjectService) projectService).create(projectInfo, userService.getById(Util.extractUserId(request)));
 
-
-        response.sendRedirect(request.getContextPath() + "/users/" + ownerId + "/projects");
+        response.sendRedirect(request.getContextPath() + "/users/" + Util.extractUserId(request) + "/projects");
 
     }
 
     @SneakyThrows
     private void showCreateProjectForm(HttpServletRequest request, HttpServletResponse response) {
-        Long ownerId = Util.extractUserId(request);
-        User owner = userService.getById(ownerId);
 
-        if (isNull(owner)) {
-            response.sendError(HttpServletResponse.SC_NOT_FOUND, "User not found");
-            return;
-        }
-
-        request.setAttribute("owner", owner);
+        request.setAttribute("owner", userService.getById(Util.extractUserId(request)));
         request.getRequestDispatcher("/WEB-INF/projects/new.jsp").forward(request, response);
     }
 
     @SneakyThrows
     private void deleteProjects(HttpServletRequest request, HttpServletResponse response) {
 
-        Long ownerId = Util.extractUserId(request);
-        Long projectId = Util.extractProjectId(request);
-
-        Project project = projectService.getById(projectId);
-        if (isNull(project) || !project.getOwner().getId().equals(ownerId)) {
-            response.sendError(HttpServletResponse.SC_NOT_FOUND, "Project not found or you don't have permission");
-            return;
-        }
-        projectService.deleteById(projectId);
-
-        response.sendRedirect(request.getContextPath() + "/users/" + ownerId + "/projects");
+        projectService.deleteById(Util.extractProjectId(request));
+        response.sendRedirect(request.getContextPath() + "/users/" + Util.extractUserId(request) + "/projects");
     }
 
 
@@ -433,12 +425,11 @@ public class UserServlet extends HttpServlet {
         Long projectId = Util.extractProjectId(request);
         Long taskListId = Util.extractTaskListId(request);
 
-
         Project project = projectService.getById(projectId);
 
         TaskList taskList = taskListService.getById(taskListId);
-        TaskList taskListForProject = ((TaskListService) taskListService).getByProjectId(projectId,taskListDao);
-        List<Task> tasksInTaskList = ((TaskService) taskService).getByTaskListId(taskListForProject.getId(),taskDao);
+        TaskList taskListForProject = ((TaskListService) taskListService).getByProjectId(projectId,taskListDAO);
+        List<Task> tasksInTaskList = ((TaskService) taskService).getByTaskListId(taskListForProject.getId(),taskDAO);
 
 
         request.setAttribute("project", project);
@@ -452,50 +443,33 @@ public class UserServlet extends HttpServlet {
     private void createTaskList(HttpServletRequest request, HttpServletResponse response) {
 
         String title = request.getParameter("title");
-        Long projectId = Util.extractProjectId(request);
-        Long ownerId = Util.extractUserId(request);
-        Project project = projectService.getById(projectId);
-
         if(isNull(title) || title.isBlank()) {
             response.sendError(HttpServletResponse.SC_BAD_REQUEST, "All fields are required");
         }
         TaskListInfo taskListInfo =  new TaskListInfo(title);
-        ((TaskListService) taskListService).create(taskListInfo,project);
+        ((TaskListService) taskListService).create(taskListInfo, projectService.getById(Util.extractProjectId(request)));
 
-
-        response.sendRedirect(request.getContextPath() + "/users/" + ownerId + "/projects");
+        response.sendRedirect(request.getContextPath() + "/users/" + Util.extractUserId(request) + "/projects");
     }
 
 
     @SneakyThrows
     private void showCreateTaskListForm(HttpServletRequest request, HttpServletResponse response) {
-        Long ownerId = Util.extractUserId(request);
-        User owner = userService.getById(ownerId);
-        Long projectId = Util.extractProjectId(request);
-        Project project = projectService.getById(projectId);
 
-        if (isNull(owner)) {
-            response.sendError(HttpServletResponse.SC_NOT_FOUND, "User not found");
-            return;
-        }
-
-        request.setAttribute("project", project);
-        request.setAttribute("owner", owner);
+        request.setAttribute("project", projectService.getById(Util.extractProjectId(request)));
+        request.setAttribute("owner", userService.getById(Util.extractUserId(request)));
         request.getRequestDispatcher("/WEB-INF/taskLists/new.jsp").forward(request, response);
     }
 
 
     @SneakyThrows
     private void updateTaskList(HttpServletRequest request, HttpServletResponse response) {
-        Long id = Util.extractUserId(request);
         Long taskListId = Util.extractTaskListId(request);
-        Long projectId = Util.extractProjectId(request);
-
-
         TaskListInfo taskListInfo = new TaskListInfo(request.getParameter("title"));
         ((TaskListService) taskListService).edit(taskListId, taskListInfo);
 
-        response.sendRedirect(request.getContextPath() + "/users/"+id+"/projects/"+projectId+"/taskList/"+taskListId);
+        response.sendRedirect(request.getContextPath() + "/users/"+Util.extractUserId(request)+
+                "/projects/"+Util.extractProjectId(request)+"/taskList/"+taskListId);
     }
 
     @SneakyThrows
@@ -520,14 +494,10 @@ public class UserServlet extends HttpServlet {
 
     @SneakyThrows
     private void deleteTaskList(HttpServletRequest request, HttpServletResponse response) {
-        Long ownerId = Util.extractUserId(request);
         Long taskListId = Util.extractTaskListId(request);
 
         TaskList taskList = taskListService.getById(taskListId);
-        if (isNull(taskList)) {
-            response.sendError(HttpServletResponse.SC_NOT_FOUND, "TaskList not found or you don't have permission");
-            return;
-        }
+
         Project project = taskList.getProject();
         if(Objects.nonNull(project)) {
             project.setTaskList(null);
@@ -535,7 +505,7 @@ public class UserServlet extends HttpServlet {
         }
         taskListService.deleteById(taskListId);
 
-        response.sendRedirect(request.getContextPath() + "/users/" + ownerId + "/projects");
+        response.sendRedirect(request.getContextPath() + "/users/" + Util.extractUserId(request) + "/projects");
     }
 
 
@@ -558,15 +528,11 @@ public class UserServlet extends HttpServlet {
     }
     @SneakyThrows
     private void showTask(HttpServletRequest request, HttpServletResponse response) {
-        Long taskId = Util.extractTaskId(request);
-        Long projectId = Util.extractProjectId(request);
-        Long userId = Util.extractUserId(request);
-        Long taskListId = Util.extractTaskListId(request);
 
-        request.setAttribute("task", taskService.getById(taskId));
-        request.setAttribute("project", projectService.getById(projectId));
-        request.setAttribute("user",userService.getById(userId));
-        request.setAttribute("taskList", taskListService.getById(taskListId));
+        request.setAttribute("task", taskService.getById(Util.extractTaskId(request)));
+        request.setAttribute("project", projectService.getById(Util.extractProjectId(request)));
+        request.setAttribute("user",userService.getById(Util.extractUserId(request)));
+        request.setAttribute("taskList", taskListService.getById(Util.extractTaskListId(request)));
         request.getRequestDispatcher("/WEB-INF/tasks/show.jsp").forward(request, response);
 
     }
@@ -579,8 +545,7 @@ public class UserServlet extends HttpServlet {
         String completed = request.getParameter("completed");
         String creationDate = request.getParameter("creationDate");
         String deadline = request.getParameter("deadline");
-        Long projectId = Util.extractProjectId(request);
-        Long ownerId = Util.extractUserId(request);
+
         Long taskListId = Util.extractTaskListId(request);
         TaskList taskList = taskListService.getById(taskListId);
 
@@ -593,27 +558,17 @@ public class UserServlet extends HttpServlet {
         ((TaskService) taskService).create(taskInfo,taskList);
 
 
-        response.sendRedirect(request.getContextPath() + "/users/" + ownerId + "/projects/"+projectId+"/taskList/"+taskListId);
+        response.sendRedirect(request.getContextPath() + "/users/" + Util.extractUserId(request) +
+                "/projects/"+Util.extractProjectId(request)+"/taskList/"+taskListId);
 
     }
 
     @SneakyThrows
     private void showCreateTaskForm(HttpServletRequest request, HttpServletResponse response) {
-        Long ownerId = Util.extractUserId(request);
-        User owner = userService.getById(ownerId);
-        Long taskListId = Util.extractTaskListId(request);
-        TaskList taskList = taskListService.getById(taskListId);
-        Long projectId = Util.extractProjectId(request);
-        Project project = projectService.getById(projectId);
 
-        if (isNull(owner)) {
-            response.sendError(HttpServletResponse.SC_NOT_FOUND, "User not found");
-            return;
-        }
-
-        request.setAttribute("taskList", taskList);
-        request.setAttribute("project", project);
-        request.setAttribute("owner", owner);
+        request.setAttribute("taskList", taskListService.getById(Util.extractTaskListId(request)));
+        request.setAttribute("project", projectService.getById(Util.extractProjectId(request)));
+        request.setAttribute("owner", userService.getById(Util.extractUserId(request)));
         request.getRequestDispatcher("/WEB-INF/tasks/new.jsp").forward(request, response);
 
     }
@@ -621,18 +576,11 @@ public class UserServlet extends HttpServlet {
     private void editTask(HttpServletRequest request, HttpServletResponse response) {
 
         Long projectId = Util.extractProjectId(request);
-        Long taskListId = Util.extractTaskListId(request);
-        Long taskId= Util.extractTaskId(request);
-        TaskList taskList = taskListService.getById(taskListId);
         Project project = projectService.getById(projectId);
-        Task task = taskService.getById(taskId);
 
-        if (isNull(taskList)) {
-            response.sendError(HttpServletResponse.SC_NOT_FOUND, "Project not found for this user");
-            return;
-        }
-        request.setAttribute("task", task);
-        request.setAttribute("taskList", taskList);
+
+        request.setAttribute("task", taskService.getById(Util.extractTaskId(request)));
+        request.setAttribute("taskList", taskListService.getById(Util.extractTaskListId(request)));
         request.setAttribute("project", project);
         request.setAttribute("user", project.getOwner());
         request.getRequestDispatcher("/WEB-INF/tasks/edit.jsp").forward(request, response);
@@ -642,15 +590,14 @@ public class UserServlet extends HttpServlet {
     @SneakyThrows
     private void updateTask(HttpServletRequest request, HttpServletResponse response) {
         Long id = Util.extractUserId(request);
-        Long taskListId = Util.extractTaskListId(request);
-        Long projectId = Util.extractProjectId(request);
         Long taskId = Util.extractTaskId(request);
 
         TaskInfo taskInfo = new TaskInfo(request.getParameter("title"),request.getParameter("description"),
                 request.getParameter("completed"),request.getParameter("creationDate"),request.getParameter("deadline"));
         ((TaskService) taskService).edit(taskId, taskInfo);
 
-        response.sendRedirect(request.getContextPath() + "/users/"+id+"/projects/"+projectId+"/taskList/"+taskListId);
+        response.sendRedirect(request.getContextPath() + "/users/"+id+"/projects/"+
+                Util.extractProjectId(request)+"/taskList/"+Util.extractTaskListId(request));
 
     }
 
@@ -658,27 +605,10 @@ public class UserServlet extends HttpServlet {
     @SneakyThrows
     private void deleteTask(HttpServletRequest request, HttpServletResponse response) {
 
-        Long ownerId = Util.extractUserId(request);
-        Long taskListId = Util.extractTaskListId(request);
-        Long projectId = Util.extractProjectId(request);
-        Long taskId = Util.extractTaskId(request);
-        Task task = taskService.getById(taskId);
-
-        if (isNull(task)) {
-            response.sendError(HttpServletResponse.SC_NOT_FOUND, "TaskList not found or you don't have permission");
-            return;
-        }
-
-        TaskList taskList = task.getTaskList();
-        if (taskList != null) {
-            taskList.getTasks().remove(task);
-            taskListService.update(taskList);
-        }
-
-        taskService.deleteById(taskId);
-
-        response.sendRedirect(request.getContextPath() + "/users/" + ownerId + "/projects/" + projectId + "/taskList/"+taskListId);
-
+        taskService.deleteById(Util.extractTaskId(request));
+        response.sendRedirect(
+                request.getContextPath() + "/users/" + Util.extractUserId(request) + "/projects/" +
+                        Util.extractProjectId(request) + "/taskList/" + Util.extractTaskListId(request));
     }
 
 
@@ -698,14 +628,65 @@ public class UserServlet extends HttpServlet {
     //--------------------------------------
     //Comments
     @SneakyThrows
-    private void showAllCommentsForTask(HttpServletRequest request, HttpServletResponse response)  {
+    private void showAllComments(HttpServletRequest request, HttpServletResponse response)  {
+
+        request.setAttribute("comments",commentService.getAll());
+        request.getRequestDispatcher("/WEB-INF/comments/index.jsp").forward(request, response);
+
+    }
+    @SneakyThrows
+    private void showCommentsForTask(HttpServletRequest request, HttpServletResponse response)  {
+
+        Long taskId = Util.extractTaskId(request);
+        List<Comment> commentsForTask = ((CommentService) commentService).getByTaskId(taskId, commentDAO);
+
+        request.setAttribute("commentsForTask", commentsForTask);
+        request.setAttribute("taskList",taskListService.getById(Util.extractTaskListId(request)));
+        request.setAttribute("project", projectService.getById(Util.extractProjectId(request)));
+        request.setAttribute("owner", userService.getById(Util.extractUserId(request)));
+        request.setAttribute("task", taskService.getById(taskId));
+        request.getRequestDispatcher("/WEB-INF/comments/show.jsp").forward(request, response);
+
+    }
+
+
+    @SneakyThrows
+    private void showCreateCommentForm(HttpServletRequest request, HttpServletResponse response) {
+        Long taskId = Util.extractTaskId(request);
+        List<Comment> commentsForTask = ((CommentService) commentService).getByTaskId(taskId, commentDAO);
+
+        request.setAttribute("taskList", taskListService.getById(Util.extractTaskListId(request)));
+        request.setAttribute("project",  projectService.getById(Util.extractProjectId(request)));
+        request.setAttribute("owner", userService.getById(Util.extractUserId(request)));
+        request.setAttribute("task", taskService.getById(taskId));
+        request.setAttribute("commentsForTask", commentsForTask);
+        request.getRequestDispatcher("/WEB-INF/comments/new.jsp").forward(request, response);
 
     }
 
     @SneakyThrows
-    private void createComments(HttpServletRequest request, HttpServletResponse response) {
+    private void createComment(HttpServletRequest request, HttpServletResponse response) {
 
+        Random random = new Random();
+        String content = request.getParameter("content");
+        String creationDate = request.getParameter("creationDate");
+        Long taskId = Util.extractTaskId(request);
+        List<User> allUsers = userService.getAll();
+
+
+        if(isNull(content) || content.isBlank() || isNull(creationDate) || creationDate.isBlank()) {
+            response.sendError(HttpServletResponse.SC_BAD_REQUEST, "All fields are required");
+        }
+        CommentInfo taskInfo =  new CommentInfo(content,creationDate);
+        ((CommentService) commentService).create(taskInfo,taskService.getById(taskId), allUsers.get(random.nextInt(allUsers.size())));
+
+
+        response.sendRedirect(request.getContextPath() + "/users/" + Util.extractUserId(request) +
+                "/projects/"+Util.extractProjectId(request)+"/taskList/"+Util.extractTaskListId(request)+
+                "/task/" + taskId+ "/comments");
     }
+
+
 
     @SneakyThrows
     private void deleteComments(HttpServletRequest request, HttpServletResponse response) {

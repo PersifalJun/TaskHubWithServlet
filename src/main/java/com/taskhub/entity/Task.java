@@ -37,10 +37,15 @@ public class Task {
     private LocalDateTime deadline;
 
     @ManyToOne
-    @JoinColumn(name = "task_list_id",nullable = false)
+    @JoinColumn(name = "task_list_id")
     private TaskList taskList;
 
-    @OneToMany(mappedBy = "task")
+    @OneToMany(mappedBy = "task", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Comment> comments;
+
+    @PreRemove
+    private void preRemove() {
+        this.taskList = null;
+    }
 
 }

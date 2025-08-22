@@ -2,10 +2,10 @@
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <html>
 <head>
-    <title>Title</title>
+    <title>Comments</title>
 </head>
 <body>
-<h2>All Users</h2>
+<h2>All Comments</h2>
 
 
 <br><br>
@@ -15,7 +15,7 @@
     <th>ID</th>
     <th>Content</th>
     <th>Date of creation</th>
-    <th>User</th>
+    <th>Author</th>
         <th>Task</th>
     </tr>
 
@@ -25,22 +25,17 @@
         <td>${comment.id}</td>
         <td>${comment.content}</td>
         <td>${comment.creationDate}</td>
-        <td>${comment.author}</td>
-        <td>${comment.task}</td>
-        <td>
-            <a href="${pageContext.request.contextPath}/comments/${comment.id}">View</a> |
-            <a href="${pageContext.request.contextPath}/comments/${comment.id}/edit">Edit</a> |
-            <form action="${pageContext.request.contextPath}/comments/${comment.id}/delete" method="post" style="display:inline;">
-                <button type="submit" onclick="return confirm('Are you sure?')">Delete</button>
-            </form>
-        </td>
+        <td>${comment.author.id}</td>
+        <td>${comment.task.id}</td>
     </tr>
 
     </c:forEach>
 
 </table>
-<br/>
-<a href="${pageContext.request.contextPath}/comments/new">Create New Comment</a>
+<br>
+<br>
+<a href="${pageContext.request.contextPath}/users">Back to List</a>
+
 
 </body>
 </html>

@@ -46,6 +46,9 @@
 <br>
 <br>
 <a href = ${pageConext.requst.pathContext}/users/taskLists>All taskLists</a>
+<br>
+<br>
+<a href = ${pageConext.requst.pathContext}/users/comments>All comments</a>
 
 </body>
 </html>
