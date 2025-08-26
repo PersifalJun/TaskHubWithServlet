@@ -68,7 +68,7 @@ public class Util {
         }
         String[] parts = path.split("/");
         for (int i = 0; i < parts.length - 1; i++) {
-            if ("comment".equals(parts[i]) && parts[i + 1].matches("\\d+")) {
+            if ("comments".equals(parts[i]) && parts[i + 1].matches("\\d+")) {
                 return Long.parseLong(parts[i + 1]);
             }
         }

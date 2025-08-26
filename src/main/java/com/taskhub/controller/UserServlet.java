@@ -148,11 +148,17 @@ public class UserServlet extends HttpServlet {
         else if (path.equals("/comments")) {   //http://localhost:8081/users/comments -> all comments
             showAllComments(request, response);
         }
+        else if (path.matches("/\\d+/projects/\\d+/taskList/\\d+/task/\\d+/comments/\\d+")) {
+            showComment(request, response);
+        }
         else if (path.matches("/\\d+/projects/\\d+/taskList/\\d+/task/\\d+/comments")) {
             showCommentsForTask(request, response);
         }
         else if (path.matches("/\\d+/projects/\\d+/taskList/\\d+/task/\\d+/comments/newComment")) {
             showCreateCommentForm(request, response);
+        }
+        else if (path.matches("/\\d+/projects/\\d+/taskList/\\d+/task/\\d+/comments/\\d+/edit")) {
+            editComment(request, response);
         }
 
 
@@ -238,6 +244,12 @@ public class UserServlet extends HttpServlet {
         //Comments
         else if(path.matches("/\\d+/projects/\\d+/taskList/\\d+/task/\\d+/comments/createComment")){
             createComment(request, response);
+        }
+        else if (path.matches("/\\d+/projects/\\d+/taskList/\\d+/task/\\d+/comments/\\d+/delete")) {
+            deleteComment(request, response);
+        }
+        else if (path.matches("/\\d+/projects/\\d+/taskList/\\d+/task/\\d+/comments/\\d+/update")) {
+            updateComment(request, response);
         }
 
 
@@ -689,16 +701,47 @@ public class UserServlet extends HttpServlet {
 
 
     @SneakyThrows
-    private void deleteComments(HttpServletRequest request, HttpServletResponse response) {
+    private void deleteComment(HttpServletRequest request, HttpServletResponse response) {
+
+        commentService.deleteById(Util.extractCommentId(request));
+        response.sendRedirect(request.getContextPath() + "/users/" + Util.extractUserId(request) + "/projects/"+
+                Util.extractProjectId(request)+"/taskList/"+Util.extractTaskListId(request)+
+                "/task/" + Util.extractTaskId(request)+ "/comments");
+
 
     }
     @SneakyThrows
-    private void updateComments(HttpServletRequest request, HttpServletResponse response) {
+    private void updateComment(HttpServletRequest request, HttpServletResponse response) {
+        Long commentId = Util.extractCommentId(request);
+
+        CommentInfo commentInfo = new CommentInfo(request.getParameter("content"),request.getParameter("creationDate"));
+        ((CommentService) commentService).edit(commentId, commentInfo);
+
+        response.sendRedirect(request.getContextPath() + "/users/"+ Util.extractUserId(request)+"/projects/"+
+                Util.extractProjectId(request)+"/taskList/"+Util.extractTaskListId(request)+
+                "/task/" + Util.extractTaskId(request)+ "/comments");
 
     }
     @SneakyThrows
-    private void editComments(HttpServletRequest request, HttpServletResponse response) {
+    private void editComment(HttpServletRequest request, HttpServletResponse response) {
+        request.setAttribute("comment",commentService.getById(Util.extractCommentId(request)));
+        request.setAttribute("task", taskService.getById(Util.extractTaskId(request)));
+        request.setAttribute("taskList", taskListService.getById(Util.extractTaskListId(request)));
+        request.setAttribute("project",projectService.getById(Util.extractProjectId(request)));
+        request.setAttribute("user", userService.getById(Util.extractUserId(request)));
+        request.getRequestDispatcher("/WEB-INF/comments/edit.jsp").forward(request, response);
 
+    }
+
+    @SneakyThrows
+    private void showComment(HttpServletRequest request, HttpServletResponse response) {
+
+        request.setAttribute("comment",commentService.getById(Util.extractCommentId(request)));
+        request.setAttribute("task", taskService.getById(Util.extractTaskId(request)));
+        request.setAttribute("taskList", taskListService.getById(Util.extractTaskListId(request)));
+        request.setAttribute("project",projectService.getById(Util.extractProjectId(request)));
+        request.setAttribute("user", userService.getById(Util.extractUserId(request)));
+        request.getRequestDispatcher("/WEB-INF/comments/view.jsp").forward(request, response);
     }
 
 
